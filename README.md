@@ -6,13 +6,20 @@ One Claude Code session plays **Reviewer** (dispatches tasks + reviews commits),
 
 ## Quick start
 
-In a new project root:
+If you're setting this up on a Windows machine where only Claude Code is installed: see **[QUICKSTART.md](QUICKSTART.md)** for the zero-baseline guide (Bun + claude-peers-mcp + plugin install, ~15 minutes).
+
+If you already have Bun + `claude-peers-mcp` working and just want to install the plugin:
+
+```sh
+claude /plugin marketplace add grant1004/claude-multi-session
+claude /plugin install claude-multi-session
+```
+
+Then in a project root:
 
 ```sh
 claude
 ```
-
-Then run the slash command:
 
 ```
 /multi-session:init
