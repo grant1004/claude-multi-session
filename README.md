@@ -63,9 +63,20 @@ This plugin codifies a workflow that has been battle-tested on a real WPF projec
 
 ## Dependencies
 
-- [`claude-peers-mcp`](https://github.com/louislva/claude-peers-mcp) — peer discovery + messaging (on Windows, you may need [this fix](https://github.com/louislva/claude-peers-mcp/pull/62))
+- [`claude-peers-mcp`](https://github.com/louislva/claude-peers-mcp) — peer discovery + messaging. On Windows, use the patched fork [`grant1004/claude-peers-mcp` branch `feat/desired-peer-id`](https://github.com/grant1004/claude-peers-mcp/tree/feat/desired-peer-id) which adds (a) the [broker auto-spawn fix](https://github.com/louislva/claude-peers-mcp/pull/62) and (b) caller-supplied peer IDs (`CLAUDE_PEERS_PEER_ID` env var read by `server.ts`).
 - Git (commits are the synchronization primitive; Worker → Reviewer handoff is "commit + send_message")
 - Obsidian (optional) — the log templates use wikilink syntax so the whole `docs/` tree can be opened as a vault
+
+## Launcher
+
+`scripts/claude-peers.ps1` is a PowerShell launcher that wraps `claude` with the right flags and sets `CLAUDE_PEERS_PEER_ID`:
+
+```powershell
+claude-peers -id reviewer
+claude-peers -id sessionA --resume abc123
+```
+
+See [QUICKSTART.md](QUICKSTART.md) §5 for install instructions (copy to a `PATH` directory, ensure `PATHEXT` includes `.PS1`).
 
 ## Status
 

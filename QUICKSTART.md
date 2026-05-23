@@ -1,6 +1,6 @@
 # Quickstart (Windows, zero-baseline)
 
-For a fresh Windows machine where only Claude Code is installed. End state: you can run `/multi-session:init` in any project and spin up parallel Worker sessions.
+For a fresh Windows machine where only Claude Code is installed. End state: you can run `/multi-session:init` in any project and spin up parallel Worker sessions with `claude-peers -id <name>`.
 
 Estimated time: ~15 minutes.
 
@@ -8,8 +8,9 @@ Estimated time: ~15 minutes.
 
 1. **Bun** (JS runtime, needed by `claude-peers-mcp`)
 2. **Git for Windows** (likely already there — verify)
-3. **claude-peers-mcp** (peer messaging MCP server)
+3. **claude-peers-mcp** (peer messaging MCP server, patched fork)
 4. **claude-multi-session** (this plugin)
+5. **claude-peers launcher** (the `claude-peers.ps1` shipped in this plugin's `scripts/`)
 
 ## 1. Install Bun
 
@@ -35,15 +36,20 @@ git --version
 
 If not installed: download from <https://git-scm.com/download/win> and install with defaults.
 
-## 3. Install claude-peers-mcp (with the Windows broker fix)
+## 3. Install claude-peers-mcp (patched fork)
 
-The upstream `louislva/claude-peers-mcp` repo has a known Windows bug — the broker daemon does not auto-spawn (see [PR #62](https://github.com/louislva/claude-peers-mcp/pull/62)). Until that PR is merged, clone the fork that includes the fix.
+The upstream `louislva/claude-peers-mcp` has two issues this workflow depends on fixing:
+
+- **Windows broker bug** — the broker daemon doesn't auto-spawn (see [PR #62](https://github.com/louislva/claude-peers-mcp/pull/62))
+- **No user-supplied peer ID** — `list_peers` shows opaque 8-char random IDs instead of nicknames like `reviewer` / `sessionA`
+
+Both fixes live in the `feat/desired-peer-id` branch of `grant1004/claude-peers-mcp` (which is built on top of the Windows fix branch).
 
 ```powershell
 cd $HOME
 git clone https://github.com/grant1004/claude-peers-mcp.git
 cd claude-peers-mcp
-git checkout fix/windows-broker-autospawn
+git checkout feat/desired-peer-id
 bun install
 ```
 
@@ -59,7 +65,7 @@ Verify:
 claude mcp list
 ```
 
-You should see `claude-peers` listed without a ✗ Failed-to-connect status. (If you see ✗ on the first try, kill any orphan `bun` processes in Task Manager and try again.)
+You should see `claude-peers` listed without a ✗ Failed-to-connect status. (If you see ✗ on the first try, kill any orphan `bun` processes in Task Manager and try opening Claude Code again.)
 
 ## 4. Install the claude-multi-session plugin
 
@@ -81,9 +87,74 @@ Verify `~/.claude/settings.json` has:
 }
 ```
 
-## 5. First project setup
+## 5. Install the `claude-peers` launcher
 
-Pick a real project you want to try this on (or `mkdir test-multi-session` for a sandbox).
+The plugin ships a PowerShell launcher in `scripts/claude-peers.ps1` that wraps `claude` with the right flags and the `CLAUDE_PEERS_PEER_ID` env var.
+
+### 5a. Put the script in your PATH
+
+Easiest: copy it to a directory already in `PATH`. Most setups use `%USERPROFILE%\bin` (create it if missing):
+
+```powershell
+$bin = "$HOME\bin"
+if (-not (Test-Path $bin)) { New-Item -ItemType Directory $bin | Out-Null }
+# Locate the installed plugin (the path depends on your marketplace source);
+# easiest is to clone the repo too if you don't want to dig:
+git clone https://github.com/grant1004/claude-multi-session.git "$HOME\claude-multi-session"
+Copy-Item "$HOME\claude-multi-session\scripts\claude-peers.ps1" $bin
+```
+
+### 5b. Ensure `~/bin` is in PATH and `.PS1` runs without `.ps1`
+
+PowerShell will execute `~/bin/claude-peers.ps1` as `claude-peers` only if:
+1. `~/bin` (or wherever you put the script) is on `PATH`
+2. `PATHEXT` includes `.PS1`
+
+Check `PATH`:
+
+```powershell
+$env:PATH -split ';' | Select-String 'bin'
+```
+
+If `~/bin` is missing, add it (per-user, permanent):
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+  'PATH',
+  "$([Environment]::GetEnvironmentVariable('PATH','User'));$HOME\bin",
+  'User'
+)
+```
+
+Check `PATHEXT`:
+
+```powershell
+$env:PATHEXT
+```
+
+If `.PS1` is missing, add it:
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+  'PATHEXT',
+  "$([Environment]::GetEnvironmentVariable('PATHEXT','User'));.PS1",
+  'User'
+)
+```
+
+**Restart PowerShell** for both changes to apply.
+
+### 5c. Verify
+
+```powershell
+claude-peers -id reviewer
+```
+
+Inside the spawned Claude Code, call `list_peers` — you should see the peer registered with `id: reviewer` (not a random string).
+
+## 6. First project setup
+
+Pick a real project to try this on (or `mkdir test-multi-session` for a sandbox).
 
 ```powershell
 cd <project root>
@@ -103,35 +174,53 @@ This will:
 
 Review the diff before committing. If anything looks wrong, you can `git restore .` to revert and re-run with adjustments.
 
-## 6. Start a multi-session session
+## 7. Start a multi-session session
 
-Now you spin up N Claude Code sessions in this project root. Each terminal:
+Now spin up N Claude Code sessions in this project root, each with a memorable peer ID:
+
+Terminal 1 — **Reviewer**:
 
 ```powershell
 cd <project root>
-claude
+claude-peers -id reviewer
 ```
 
-In session 1 (the **Reviewer**):
-> Read `.claude-multi-session/roles/reviewer.md` and act as Reviewer for this project. Use `set_summary` to declare your role, then `list_peers` to see Worker sessions.
+Then in that Claude Code session:
 
-In sessions 2-3+ (each a **Worker**):
-> Read `.claude-multi-session/roles/worker.md` and act as a Worker. Use `set_summary` to declare your role, then wait for the Reviewer to dispatch a milestone.
+> Read `.claude-multi-session/roles/reviewer.md` and act as Reviewer for this project. Use `list_peers` to see Worker sessions and start dispatching milestones.
+
+Terminal 2 — **sessionA Worker**:
+
+```powershell
+cd <project root>
+claude-peers -id sessionA
+```
+
+In that Claude Code session:
+
+> Read `.claude-multi-session/roles/worker.md` and act as a Worker. Wait for the Reviewer to dispatch a milestone.
+
+Terminal 3+ — **more workers**: same pattern, `-id sessionB`, `-id sessionC`, etc.
 
 From there, the Reviewer drives. It dispatches via `send_message`; Workers execute one milestone each, commit, and report.
 
-For the full state machine and message formats, the Reviewer / Workers will read the files under `.claude-multi-session/` themselves.
-
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 **`claude mcp list` shows `claude-peers ✗ Failed to connect`**
-- Make sure you used the fork with the Windows fix (step 3). The upstream repo will reproduce this exact symptom.
+- Make sure you used the patched fork (step 3). The upstream repo will reproduce this exact symptom on Windows.
 - Kill orphan `bun` processes in Task Manager and try opening Claude Code again.
 - Manually start the broker once with `bun "$HOME\claude-peers-mcp\broker.ts"` and check `Invoke-WebRequest http://127.0.0.1:7899/health` returns 200.
 
+**`claude-peers` command not recognized**
+- Step 5b not complete: either `~/bin` is not on `PATH` or `PATHEXT` does not include `.PS1`. Restart PowerShell after env var changes.
+- As a workaround: invoke with full path, `& "$HOME\bin\claude-peers.ps1" -id reviewer`.
+
+**`list_peers` shows random ID instead of the requested name**
+- Either the broker is from the un-patched upstream (step 3 was skipped or pointed at the wrong branch), or another live session already holds that ID.
+- Check stderr: server.ts logs a warning when it had to fall back to a random ID. Pick a different `-id`.
+
 **`list_peers` returns empty inside Claude Code**
-- The peer needs to be in the same `--scope`. Defaults are usually fine; if not, try `list_peers` with explicit `scope: "machine"`.
-- Other sessions might not have called `set_summary` yet — they won't show up as peers until they do.
+- Other sessions might not have called `set_summary` yet — they won't show up until they do (actually they show up at register, but `list_peers` filters require some context). Try `list_peers` with explicit `scope: "machine"`.
 
 **`/multi-session:init` complains "no plugin found"**
 - Re-check `~/.claude/settings.json` has the plugin under `enabledPlugins`.
@@ -141,9 +230,9 @@ For the full state machine and message formats, the Reviewer / Workers will read
 - Known limitation of the broker. Fallback: Reviewer can `git log --oneline` to see whether a Worker has actually committed even if the message hasn't arrived yet.
 
 **A Worker session crashes mid-milestone**
-- Re-open the session. The replacement session reads `CLAUDE.md` + `PROGRESS.md` + `.claude-multi-session/roles/worker.md` and waits for a fresh dispatch from the Reviewer.
+- Re-open the session with the same `claude-peers -id sessionN`. The new instance registers under the same ID (the dead-pid takeover branch kicks in), then reads `CLAUDE.md` + `PROGRESS.md` + `.claude-multi-session/roles/worker.md` and waits for a fresh dispatch.
 
-## 8. What to read next
+## 9. What to read next
 
 - `.claude-multi-session/workflow.md` — full state machine and invariants
 - `.claude-multi-session/roles/reviewer.md` and `worker.md` — role-specific job descriptions
