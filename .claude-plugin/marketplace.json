@@ -15,7 +15,7 @@
         "url": "https://github.com/grant1004"
       },
       "category": "productivity",
-      "source": ".",
+      "source": "./plugins/claude-multi-session",
       "homepage": "https://github.com/grant1004/claude-multi-session"
     }
   ]
