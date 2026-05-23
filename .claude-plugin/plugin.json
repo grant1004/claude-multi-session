@@ -1,0 +1,8 @@
+{
+  "name": "claude-multi-session",
+  "description": "Multi-session parallel coding workflow over claude-peers MCP — Reviewer / Worker roles, dispatch protocol, atomic + daily + pitfall log templates. /multi-session:init scaffolds a new project in one shot.",
+  "author": {
+    "name": "grant1004",
+    "url": "https://github.com/grant1004"
+  }
+}
