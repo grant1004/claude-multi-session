@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "grant1004-claude-multi-session",
+  "description": "Single-plugin marketplace for claude-multi-session — multi-session parallel coding workflow for Claude Code over claude-peers MCP (Reviewer / Worker roles, dispatch protocol, atomic + daily + pitfall log templates).",
+  "owner": {
+    "name": "grant1004",
+    "url": "https://github.com/grant1004"
+  },
+  "plugins": [
+    {
+      "name": "claude-multi-session",
+      "description": "Multi-session parallel coding workflow over claude-peers MCP. /multi-session:init scaffolds a project with .claude-multi-session/ role definitions, message templates, and log templates. Bundles a PowerShell launcher (claude-peers -id <name>).",
+      "author": {
+        "name": "grant1004",
+        "url": "https://github.com/grant1004"
+      },
+      "category": "productivity",
+      "source": ".",
+      "homepage": "https://github.com/grant1004/claude-multi-session"
+    }
+  ]
+}
