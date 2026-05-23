@@ -22,7 +22,6 @@
 
 [CmdletBinding(PositionalBinding = $false)]
 param(
-    [Alias('id')]
     [Parameter(Mandatory = $true)]
     [string]$Id,
 
