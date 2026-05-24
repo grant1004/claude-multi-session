@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Obsidian workspace state (keep .gitkeep, ignore runtime files)
+docs/.obsidian/workspace.json
+docs/.obsidian/workspace-mobile.json
+
+# Dependencies
+node_modules/
+
+# Editor configs
+.vscode/
+.idea/

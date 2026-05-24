@@ -20,7 +20,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 ## Milestones
 
 ### M1.1 — Add `.gitignore` for repo hygiene
-- [ ] <!-- sessionN -->
+- [x] <!-- ta07g674 --> 「註」 Focused gitignore: OS files (.DS_Store, Thumbs.db), Obsidian workspace state (workspace.json, workspace-mobile.json), node_modules/, editor configs (.vscode/, .idea/). Kept minimal — no boilerplate dump.
 - **Expected files**: `.gitignore`
 - **Acceptance**:
   - `.gitignore` exists at repo root with entries for: OS files (`.DS_Store`, `Thumbs.db`), Obsidian workspace state (`docs/.obsidian/workspace.json`, `docs/.obsidian/workspace-mobile.json`), `node_modules/`, editor configs (`.vscode/`, `.idea/`)
