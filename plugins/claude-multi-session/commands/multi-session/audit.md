@@ -15,6 +15,11 @@ description: Reviewer audit phase — survey a project and produce PROGRESS.md w
 
 You are the **Reviewer** running the audit phase. Survey this project and produce a `PROGRESS.md` with milestone candidates + a recommended worker count. Do **not** write any production code; only the audit artifact.
 
+### 0. Onboarding pre-check
+
+- If you haven't already in this session, run `/multi-session:bootstrap` first (or do its core steps manually): read `.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/workflow.md`, and `set_summary` to declare your Reviewer role. The audit produced without role context tends to drift.
+- If `.claude-multi-session/` doesn't exist, the project hasn't been scaffolded — tell the user to run `/multi-session:init` first. Stop.
+
 ### 1. Pre-flight check
 
 - If `PROGRESS.md` already exists and lacks an explicit "audit phase complete" marker in the `## 現在進度` line, **stop and ask the user** before overwriting. Show them the existing file.

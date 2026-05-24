@@ -13,6 +13,10 @@ description: Reviewer roll-call — broadcast introduction to all worker peers a
 
 You are the **Reviewer**. Run a roll-call ceremony: introduce yourself to all worker peers, ask them to ack with their own self-introduction, and produce a roster.
 
+### 0. Onboarding pre-check
+
+- If you haven't run `/multi-session:bootstrap` in this session yet, do it first. The roll-call assumes you've read `.claude-multi-session/roles/reviewer.md` and `set_summary` already.
+
 ### 1. Sanity check role
 
 - If your `CLAUDE_PEERS_PEER_ID` is not `reviewer` (or you have no env ID at all), warn the user that this command is for the Reviewer session, but proceed if they explicitly tell you to.
