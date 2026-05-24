@@ -60,7 +60,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — the quickstart is the primary onboarding path; a Windows-only guide blocks half the potential user base
 
 ### M4.1 — Add `/multi-session:status` command
-- [ ] <!-- sessionN -->
+- [x] <!-- ta07g674 --> 「註」 Read-only command (allowed-tools: Read, Bash(git:*)). Parses frontmatter skip/in_progress lists + milestone checkboxes + session comments. Outputs ✅/🔄/⬜ table + counts. ~30 line cap enforced in behavior rules.
 - **Expected files**: `plugins/claude-multi-session/commands/multi-session/status.md`
 - **Acceptance**:
   - Running `/multi-session:status` reads `PROGRESS.md` and prints: current phase (audit / dispatching / wrap-up), milestone summary table (ID, description, status checkbox, assigned session if noted in 「註」), count of completed/in-progress/remaining/skipped
