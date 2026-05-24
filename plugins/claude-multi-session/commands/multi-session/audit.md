@@ -15,10 +15,15 @@ description: Reviewer audit phase — survey a project and produce PROGRESS.md w
 
 You are the **Reviewer** running the audit phase. Survey this project and produce a `PROGRESS.md` with milestone candidates + a recommended worker count. Do **not** write any production code; only the audit artifact.
 
-### 0. Onboarding pre-check
+### 0. Onboarding (mandatory, no skipping)
 
-- If you haven't already in this session, run `/multi-session:bootstrap` first (or do its core steps manually): read `.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/workflow.md`, and `set_summary` to declare your Reviewer role. The audit produced without role context tends to drift.
-- If `.claude-multi-session/` doesn't exist, the project hasn't been scaffolded — tell the user to run `/multi-session:init` first. Stop.
+These steps are not optional — do them every time, even if you "think you remember". Audit quality collapses without role context.
+
+1. **Sanity check scaffold**. If `.claude-multi-session/` doesn't exist, tell the user to run `/multi-session:init` first. Stop.
+2. **Read the role file in full**: `Read .claude-multi-session/roles/reviewer.md`
+3. **Read the workflow state machine**: `Read .claude-multi-session/workflow.md`
+4. **Read the dispatch + review templates** (you'll need them later): `Read .claude-multi-session/messages/dispatch.md` and `Read .claude-multi-session/messages/review-pass.md`
+5. **set_summary** to declare your role: `set_summary("Reviewer — auditing <project basename>")`
 
 ### 1. Pre-flight check
 

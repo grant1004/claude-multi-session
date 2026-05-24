@@ -2,6 +2,26 @@
 
 Copy this block into `send_message` to a Worker when assigning a new milestone.
 
+**For the Worker's first dispatch in a session, include the "onboarding pre-block"** so the Worker primes role context before executing. Subsequent dispatches can skip the pre-block.
+
+## First-dispatch pre-block (include only on the worker's first dispatch in this session)
+
+```
+👋 First dispatch in this session. Before touching the milestone below, do this onboarding **once**:
+
+1. Read .claude-multi-session/roles/worker.md (your job description)
+2. Read .claude-multi-session/workflow.md (state machine)
+3. Read .claude-multi-session/messages/completion-report.md (the format you'll send back)
+4. Read .claude-multi-session/log-templates/atomic.md and .claude-multi-session/log-templates/daily.md (the log artifacts you must produce)
+5. set_summary("Worker <your-id> — working on <project basename>")
+
+Confirm via send_message back: "✅ Onboarded, starting Mx.y" — then start. The dispatch follows.
+
+---
+```
+
+## Dispatch block (every dispatch)
+
 ```
 派工 → sessionN: **Mx.y** <one-line task description> (🤖 / ✍️)
 
@@ -19,19 +39,22 @@ Copy this block into `send_message` to a Worker when assigning a new milestone.
 - <file / region 1> (sessionM is editing)
 - <file / region 2>
 
-🔒 規則提醒 (rules):
-- Only do Mx.y; stop and report when done
-- Build 0 error required before commit (<build command>)
-- Commit message: `Mx.y: <description>`
-- Same commit must include `PROGRESS.md` checkbox update (M x.y `[ ] → [x]`) + 「註」 column
-- Write atomic log to `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md`
+🔒 規則提醒 (rules — non-negotiable, all four required):
+1. Only do Mx.y; stop and report when done. No scope creep.
+2. Build 0 error required before commit (<build command>).
+3. Commit message format: `Mx.y: <description>`.
+4. Same commit must include:
+   - `PROGRESS.md` checkbox update (Mx.y `[ ] → [x]`) + 「註」 column with implementation notes
+   - **Atomic log file** at `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` (use template `.claude-multi-session/log-templates/atomic.md`)
+
+If you skip the atomic log or PROGRESS.md update, the review will fail and you'll redo the commit. This is enforced — not optional.
 
 🤖 Auto-pass criteria (optional, for trivial milestones):
 If all of the following hold, you may skip waiting for manual review:
 - [ ] Build returns 0 error
 - [ ] Changed files match the dispatched scope exactly (`git diff --stat` shows only those files)
 - [ ] Commit message matches `^Mx.y: ` regex
-- [ ] Atomic log written
+- [ ] Atomic log written at the path above
 
 If any fail, send normal completion-report and wait for manual review.
 

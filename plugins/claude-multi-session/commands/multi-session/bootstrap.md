@@ -1,7 +1,14 @@
 ---
 allowed-tools: Bash, Read, mcp__claude-peers__set_summary, mcp__claude-peers__list_peers
-description: Auto-detect role from CLAUDE_PEERS_PEER_ID env var and run the matching onboarding ritual (read role file, set_summary, report ready)
+description: Manual onboarding ritual (escape hatch — usually NOT needed; /multi-session:audit primes Reviewer, first dispatch primes Worker)
 ---
+
+> **Usually not needed.** The Reviewer is auto-primed by `/multi-session:audit` (step 0). The Worker is auto-primed by the Reviewer's first dispatch message (which carries an onboarding pre-block). Reach for this command only in escape-hatch scenarios:
+>
+> - Session restarted mid-flow and you want to re-read role context without waiting for a dispatch
+> - You launched without the launcher and want to confirm role state
+> - You want to verify your role files / log templates exist before any work happens
+
 
 ## Context
 

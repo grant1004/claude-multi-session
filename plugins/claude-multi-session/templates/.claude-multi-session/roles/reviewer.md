@@ -31,8 +31,10 @@ Use `.claude-multi-session/messages/dispatch.md` as the structural template. Req
 - 📂 Expected files (explicit list, "only touch these")
 - 🎯 Optional technical hints
 - ⚠️ Don't touch (other sessions' active regions)
-- 🔒 Rule reminders (build 0 error, commit message format, one milestone per dispatch, commit includes PROGRESS.md tick)
+- 🔒 Rule reminders (build 0 error, commit message format, one milestone per dispatch, commit includes PROGRESS.md tick + atomic log)
 - 🤖 Auto-pass criteria (optional — pre-commit Worker self-check items that, if all pass, skip Reviewer manual review for trivial milestones)
+
+**First dispatch to each Worker must include the onboarding pre-block** (see `messages/dispatch.md` § "First-dispatch pre-block"). This forces the Worker to read `roles/worker.md` and the log templates and call `set_summary` before touching any code. Without it, Workers commonly skip atomic log writes and PROGRESS.md updates. Track per-Worker first-dispatch status mentally (or in `.dispatched.md`) so subsequent dispatches can skip the pre-block.
 
 ## Review message format
 

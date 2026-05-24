@@ -176,31 +176,52 @@ Review the diff before committing. If anything looks wrong, you can `git restore
 
 ## 7. Start a multi-session session
 
-Now spin up N Claude Code sessions in this project root, each with a memorable peer ID:
+The flow has two onboarding paths baked into the workflow itself — you don't run a separate "bootstrap" step:
 
-Terminal 1 — **Reviewer**:
+- **Reviewer** primes itself when it runs `/multi-session:audit` (the audit command's step 0 forces it to read its role file, workflow, and message templates before producing PROGRESS.md).
+- **Worker** is primed by the Reviewer's first dispatch message, which carries an explicit "first-dispatch pre-block" telling the worker to read `roles/worker.md`, the log templates, and set_summary before touching code.
+
+This means: don't ask Reviewer / Workers to manually `Read roles/...` — the commands and messages handle it.
+
+### 7a. Reviewer terminal
 
 ```powershell
 cd <project root>
 claude-peers -id reviewer
 ```
 
-Then in that Claude Code session:
+Inside Claude Code:
 
-> Read `.claude-multi-session/roles/reviewer.md` and act as Reviewer for this project. Use `list_peers` to see Worker sessions and start dispatching milestones.
+```
+/multi-session:audit
+```
 
-Terminal 2 — **sessionA Worker**:
+This (a) primes the Reviewer with role context, (b) walks the project, and (c) produces `PROGRESS.md` with milestone candidates + a recommended worker count. Review the output and decide how many workers to spin up.
+
+### 7b. Worker terminals (one per parallel worker)
+
+Open another terminal for each worker:
 
 ```powershell
 cd <project root>
 claude-peers -id sessionA
 ```
 
-In that Claude Code session:
+Then inside that Claude Code, just say:
 
-> Read `.claude-multi-session/roles/worker.md` and act as a Worker. Wait for the Reviewer to dispatch a milestone.
+> Standing by. Waiting for the Reviewer to dispatch.
 
-Terminal 3+ — **more workers**: same pattern, `-id sessionB`, `-id sessionC`, etc.
+No manual file reads needed — the Reviewer's first dispatch will include the onboarding pre-block. Repeat for `sessionB`, `sessionC`, etc. up to the recommended count.
+
+### 7c. Back in the Reviewer terminal — roll-call + dispatch
+
+```
+/multi-session:roll-call
+```
+
+This broadcasts an introduction to each worker peer, collects acks, and prints a roster. After the roster is complete, decide which milestones go to which worker (based on the audit's parallelism analysis) and dispatch each manually via `send_message` using the `dispatch.md` template — including the first-dispatch pre-block for each worker on their first task.
+
+From there the Reviewer drives: dispatch → Worker executes → Worker `send_message` completion-report → Reviewer reviews via `git log --stat` + `git diff` → pass or fail → next dispatch.
 
 From there, the Reviewer drives. It dispatches via `send_message`; Workers execute one milestone each, commit, and report.
 
