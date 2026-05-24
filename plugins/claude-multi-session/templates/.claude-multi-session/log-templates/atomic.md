@@ -26,7 +26,7 @@ daily: "[[session-N]]"                   # back-link to this session's daily sum
 - (only list non-trivial changes; PROGRESS.md tick + boilerplate not needed)
 
 ## 🎯 實作要點 / 設計決策 / Implementation notes
-1. **<decision title, e.g. "Chose DataTrigger + MultiBinding over ListBox">**
+1. **<decision title, e.g. "Chose Redis cache over in-memory Map for session storage">**
    - Why: <reason>
    - Alternative considered: <option> — rejected because <reason>
 

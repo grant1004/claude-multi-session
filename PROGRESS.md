@@ -29,7 +29,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — prevents accidental commits of per-user state (Obsidian workspace, OS metadata) that cause noise in diffs and merge conflicts
 
 ### M2.1 — Replace WPF-specific examples in templates with framework-agnostic ones
-- [ ] <!-- sessionN -->
+- [x] <!-- uogks3hf --> 「註」Replaced all WPF/XAML/DataTrigger examples with generic ones: env-var-shadow pitfall, Redis cache decisions, REST API pagination patterns. Also cleaned daily.md (DependencyProperty, BeginAnimation, DrawingVisual, App.xaml). Template structure preserved unchanged.
 - **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/pitfall.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/atomic.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/reviewer-master.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/completion-report.md`
 - **Acceptance**:
   - No references to WPF, DataTrigger, MultiBinding, XAML, DependencyProperty, `App.xaml`, or `.csproj` remain in any template file under `plugins/claude-multi-session/templates/`

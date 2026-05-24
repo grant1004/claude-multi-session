@@ -47,9 +47,9 @@ milestones-accepted-by-user: [Mu.v]
 - Acceptance criteria 2: <criterion> → met ✓
 
 ### 評語 / Evaluation
-- <constructive bullet, e.g. "DataTrigger + MultiBinding is the clean demo-stage solution">
-- <cross-session observation, e.g. "Worker proactively suggested FooConverter to sessionB for M6.4 — cross-session collaboration bonus">
-- <nit (non-blocking), e.g. "could rename SelectGroupCommand to TogglerSelectedGroupCommand for clarity">
+- <constructive bullet, e.g. "Redis cache with TTL is the right call for this scale">
+- <cross-session observation, e.g. "Worker proactively shared the pagination helper with sessionB for M6.4 — cross-session collaboration bonus">
+- <nit (non-blocking), e.g. "could rename handleRequest to processIncomingOrder for clarity">
 
 (Numbered or bulleted. Concrete and specific; "looks good" is not a review.)
 
@@ -65,7 +65,7 @@ milestones-accepted-by-user: [Mu.v]
 - `PROGRESS.md` 現在進度: M1 ~ M10 全 `[x]`, 剩 M11
 - 設計決策變更紀錄 / Decision changelog: sessionA appended "M9 fully revived after defer"
 - 卡關紀錄 / Blocker log: (none new today)
-- **新增踩坑庫條目 / New pitfall entries added today**: [[wpf-datatrigger-const-value]] (created by sessionA)
+- **新增踩坑庫條目 / New pitfall entries added today**: [[env-var-shadow]] (created by sessionA)
 
 ## 📌 剩餘 milestone / Remaining
 

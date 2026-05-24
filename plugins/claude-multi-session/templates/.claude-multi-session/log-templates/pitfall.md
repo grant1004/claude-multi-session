@@ -16,8 +16,8 @@ If a trap is genuinely one-time (specific to a single milestone, unlikely to rec
 
 ```markdown
 ---
-title: <descriptive title, e.g. "WPF DataTrigger.Value does not bind">
-category: <wpf | git | build | progress-md | workflow | language-runtime | ...>
+title: <descriptive title, e.g. "Environment variable silently ignored when .env file shadows it">
+category: <git | build | progress-md | workflow | language-runtime | config | api | ...>
 first-seen: YYYY-MM-DD
 severity: <low | medium | high>
 status: <documented | fix-pending | resolved>
@@ -29,24 +29,28 @@ status: <documented | fix-pending | resolved>
 <concrete description, with example code or message if applicable>
 
 Example:
-```xml
-<DataTrigger Binding="{Binding X}" Value="{Binding Y}">
+```bash
+# .env file (committed to repo)
+DATABASE_URL=postgres://localhost/myapp_dev
+
+# shell (set before launch)
+export DATABASE_URL=postgres://prod-host/myapp_prod
 ```
-→ `Y` is not actually bound; DataTrigger treats `Value` as a literal binding-expression string.
+→ App reads `postgres://localhost/myapp_dev` because the `.env` loader runs after shell env is already set, overwriting the intended production value.
 
 ## 根因 / Root cause
 <one paragraph: why this happens, not just how to avoid it>
 
-DataTrigger.Value is declared as `object`, and the framework does not invoke the binding pipeline on it — `Value` is meant to be a const compared against the result of `Binding`.
+The `.env` loading library (e.g. `dotenv`) defaults to **overwrite** mode. When `.env` is committed with dev defaults, it silently replaces any value already set in the shell environment — the opposite of what most developers expect.
 
 ## 修法 / Fix
 <concrete approach with code sketch if useful>
 
-Use `IMultiValueConverter` (e.g. `AreEqualConverter`): feed both `X` and `Y` into a `MultiBinding`, output bool, then write `Binding="{MultiBinding ...}" Value="True"` on the DataTrigger.
+Configure the `.env` loader to skip variables already present in the environment (e.g. `dotenv` with `override: false`, or `python-dotenv` default behavior). Alternatively, remove `.env` from version control and use `.env.example` as the template.
 
 ## 相關規則 / 文件 / Related rules & docs
-- [[02-coding-conventions]] §XAML (if relevant)
-- [[CLAUDE]] §"WPF-specific patterns" (if relevant)
+- [[02-coding-conventions]] §environment-config (if relevant)
+- [[CLAUDE]] §"deployment patterns" (if relevant)
 
 ## 出現紀錄 / Occurrence record
 
