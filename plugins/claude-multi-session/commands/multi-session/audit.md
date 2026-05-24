@@ -6,8 +6,8 @@ description: Reviewer audit phase — survey a project and produce PROGRESS.md w
 ## Context
 
 - Project root: !`pwd`
-- Working tree state: !`git status --short`
-- Recent commits: !`git log --oneline -20`
+- Working tree state: !`git status --short 2>/dev/null || echo "(not a git repository)"`
+- Recent commits: !`git log --oneline -20 2>/dev/null || echo "(no commits yet — fresh repo)"`
 - Existing `PROGRESS.md`: !`test -f PROGRESS.md && echo "yes (will refuse to overwrite without --force)" || echo "no"`
 - Existing `CLAUDE.md`: !`test -f CLAUDE.md && head -5 CLAUDE.md || echo "(none)"`
 
