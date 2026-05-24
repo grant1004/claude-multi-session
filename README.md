@@ -69,14 +69,19 @@ This plugin codifies a workflow that has been battle-tested on a real WPF projec
 
 ## Launcher
 
-`scripts/claude-peers.ps1` is a PowerShell launcher that wraps `claude` with the right flags and sets `CLAUDE_PEERS_PEER_ID`:
+Two launcher scripts are provided in `scripts/` — they do the same thing (set `CLAUDE_PEERS_PEER_ID`, launch `claude` with the right flags, pass extra args through):
 
-```powershell
+| Script | Platform | Install |
+|---|---|---|
+| `claude-peers.ps1` | Windows (PowerShell) | Copy to a `PATH` directory, ensure `PATHEXT` includes `.PS1` |
+| `claude-peers` | macOS / Linux (bash) | Copy to a `PATH` directory (e.g. `~/.local/bin`), `chmod +x` |
+
+```sh
 claude-peers -id reviewer
 claude-peers -id sessionA --resume abc123
 ```
 
-See [QUICKSTART.md](QUICKSTART.md) §5 for install instructions (copy to a `PATH` directory, ensure `PATHEXT` includes `.PS1`).
+See [QUICKSTART.md](QUICKSTART.md) §5 for platform-specific install details.
 
 ## Status
 

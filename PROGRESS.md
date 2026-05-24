@@ -39,7 +39,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — current WPF examples confuse users applying the plugin to non-WPF projects and make the plugin look domain-specific rather than general-purpose
 
 ### M3.1 — Add bash/zsh launcher script for macOS/Linux
-- [ ] <!-- sessionN -->
+- [x] <!-- 20c59hcc --> 「註」bash launcher `scripts/claude-peers` (no extension) mirrors PS1 behavior: `-id` arg, env var, `exec` passthrough. README § Launcher updated with platform table.
 - **Expected files**: `plugins/claude-multi-session/scripts/claude-peers` (no extension, Unix-idiomatic), `README.md`
 - **Acceptance**:
   - `claude-peers` (no extension) exists under `scripts/`, is executable (`chmod +x`), accepts `-id <name>` and optional extra args, sets `CLAUDE_PEERS_PEER_ID` env var, launches `claude` with `--dangerously-skip-permissions --dangerously-load-development-channels server:claude-peers`

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#
+# claude-peers -id <name> [...extra claude args]
+#
+# Launcher for Claude Code wired into the claude-peers MCP channel network.
+#
+# What it does:
+#   1. Sets CLAUDE_PEERS_PEER_ID=<name> for the launched process so
+#      server.ts (branch feat/desired-peer-id of grant1004/claude-peers-mcp)
+#      asks the broker to register the peer under that ID. list_peers then
+#      shows "reviewer" / "sessionA" instead of an 8-char random ID.
+#   2. Launches claude with:
+#        --dangerously-skip-permissions             no permission prompts
+#        --dangerously-load-development-channels    enable inbound channel push
+#          server:claude-peers                      from the claude-peers MCP
+#   3. Passes any extra args through to claude verbatim.
+#
+# Examples:
+#   claude-peers -id reviewer
+#   claude-peers -id sessionA --resume abc123
+#
+# On older claude-peers-mcp versions (without the CLAUDE_PEERS_PEER_ID patch)
+# the env var is silently ignored and the broker assigns a random ID.
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: claude-peers -id <name> [...extra claude args]" >&2
+  exit 1
+}
+
+# --- parse -id <name> ---------------------------------------------------
+if [[ $# -lt 2 ]] || [[ "$1" != "-id" ]]; then
+  usage
+fi
+
+peer_id="$2"
+shift 2
+
+# --- launch --------------------------------------------------------------
+export CLAUDE_PEERS_PEER_ID="$peer_id"
+
+exec claude \
+  --dangerously-skip-permissions \
+  --dangerously-load-development-channels server:claude-peers \
+  "$@"
