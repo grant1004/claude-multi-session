@@ -65,7 +65,7 @@ This plugin codifies a workflow that has been battle-tested on a real WPF projec
 
 - [`claude-peers-mcp`](https://github.com/louislva/claude-peers-mcp) — peer discovery + messaging. On Windows, use the patched fork [`grant1004/claude-peers-mcp` branch `feat/desired-peer-id`](https://github.com/grant1004/claude-peers-mcp/tree/feat/desired-peer-id) which adds (a) the [broker auto-spawn fix](https://github.com/louislva/claude-peers-mcp/pull/62) and (b) caller-supplied peer IDs (`CLAUDE_PEERS_PEER_ID` env var read by `server.ts`).
 - Git (commits are the synchronization primitive; Worker → Reviewer handoff is "commit + send_message")
-- Obsidian (optional) — the log templates use wikilink syntax so the whole `docs/` tree can be opened as a vault
+- Obsidian (optional but recommended) — log templates use wikilink syntax (`[[Mx.y-sessionN]]` etc.). `/multi-session:init` creates `docs/.obsidian/` so `docs/` opens as an Obsidian vault out of the box: graph view shows the milestone/atomic-log/pitfall network, backlinks auto-populate the pitfall "出現紀錄" section, and the four log types (atomic / daily / reviewer-master / pitfall) form a navigable knowledge base.
 
 ## Launcher
 

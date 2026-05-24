@@ -170,9 +170,16 @@ Inside Claude Code:
 This will:
 - Create `.claude-multi-session/` with role definitions, message templates, and log templates
 - Create `docs/session-logs/`, `docs/review-logs/`, `docs/pitfalls/` (empty, with `.gitkeep`)
+- Create `docs/.obsidian/` so you can open `docs/` as an Obsidian vault (log templates use wikilink syntax — see §0 below)
 - Append a "Multi-session parallel workflow" section to your project's `CLAUDE.md` (creates the file if missing)
 
 Review the diff before committing. If anything looks wrong, you can `git restore .` to revert and re-run with adjustments.
+
+### 6a. (Optional) Open `docs/` as an Obsidian vault
+
+If you have Obsidian installed: `File → Open vault → Open folder as vault → <project root>/docs`. The graph view will visualize the milestone / atomic-log / pitfall network as the workers fill it in. Backlinks auto-populate the pitfall "出現紀錄" section without manual maintenance.
+
+You don't have to use Obsidian — the markdown files are plain text and work fine read with any editor. But the wikilink structure was designed for graph navigation.
 
 ## 7. Start a multi-session session
 
