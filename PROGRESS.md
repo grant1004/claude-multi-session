@@ -49,7 +49,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — plugin is currently Windows-only in practice; macOS/Linux users can't use the launcher without writing their own wrapper
 
 ### M3.2 — Expand QUICKSTART.md with macOS/Linux sections
-- [ ] <!-- sessionN -->
+- [x] <!-- 20c59hcc --> 「註」All 8 steps updated: platform-split headers for Bun install, Git install, claude-peers-mcp clone/register, launcher install (full macOS/Linux PATH + chmod section). Steps 4/6/7 marked platform-neutral with `sh` blocks. Troubleshooting items split per-platform.
 - **Expected files**: `QUICKSTART.md`
 - **Acceptance**:
   - Each numbered step (1-8) has a macOS/Linux variant or a note that it's platform-neutral
@@ -70,7 +70,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: medium — convenient for Reviewer mid-session but `Read PROGRESS.md` works fine as a manual fallback
 
 ### M5.1 — Add CHANGELOG.md covering existing commit history
-- [ ] <!-- sessionN -->
+- [x] <!-- uogks3hf --> 「註」Keep a Changelog format, [Unreleased] + [0.1.0] sections. Covers all 18 commits grouped into Added (11), Changed (4), Fixed (3). Includes M1.1/M2.1/M3.1 wave-1 work.
 - **Expected files**: `CHANGELOG.md`
 - **Acceptance**:
   - `CHANGELOG.md` exists at repo root, follows Keep a Changelog format (`## [Unreleased]` + `## [0.1.0] - 2026-05-25` or similar)
