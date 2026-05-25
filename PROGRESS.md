@@ -75,7 +75,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: medium — prevents template drift from recurring; PR gate catches issues before merge
 
 ### M3.1 — Add `/multi-session:dispatch` helper command
-- [ ] 「註」
+- [x] <!-- sessionC --> 「註」Read-only command (allowed-tools: Read, Bash(git:*), AskUserQuestion, list_peers). 10-step flow: parse PROGRESS.md frontmatter + milestone sections → list_peers → AskUserQuestion (milestone + worker pick) → file-region conflict detection against in_progress list → auto-build "don't touch" list → detect first-dispatch via worker summary heuristic → generate complete dispatch.md-format message as fenced code block. Handles edge cases: unmet dependencies (warning), frontmatter/checkbox inconsistency flags, missing worktree (creation hint). Never writes files or sends messages — output only.
 - **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
 - **Acceptance**:
   - Command reads PROGRESS.md, extracts remaining (unchecked) milestones, and lists them with expected files
