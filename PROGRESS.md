@@ -1,134 +1,126 @@
 ---
 skipped: []
-in_progress: []
-completed: [M1.1, M2.1, M3.1, M3.2, M4.1, M5.1, M6.1, M6.2, M6.3, M6.4]
+in_progress: [M1.1, M2.1, M3.1]
+completed: []
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-all 10 milestones complete (M1.1–M6.4). 3 workers, 3 waves, 0 failures, 0 git conflicts.
+audit phase complete — awaiting user to select milestones for dispatch.
 
 ## Audit summary
 
-- **Project**: claude-multi-session — Claude Code plugin providing a multi-session parallel coding workflow (Reviewer/Worker roles, dispatch protocol, structured logging) over `claude-peers-mcp`
-- **Tech stack**: Pure markdown plugin (no build step), PowerShell launcher script, depends on `claude-peers-mcp` (Bun/TypeScript, external). Git as synchronization primitive.
-- **Architecture quick-take**: The plugin has 4 slash commands (`init`, `audit`, `roll-call`, `bootstrap`) under `plugins/claude-multi-session/commands/`, 11 template files in `plugins/claude-multi-session/templates/` (3 roles, 3 message formats, 4 log formats, 1 workflow doc), a PowerShell launcher (`scripts/claude-peers.ps1`), and top-level docs (`README.md`, `QUICKSTART.md`). The marketplace manifest at `.claude-plugin/marketplace.json` points at the `plugins/claude-multi-session/` subdirectory via `git-subdir` source. No runtime code — the "logic" lives in command prompt files that instruct Claude Code what to do.
+- **Project**: claude-multi-session — Claude Code plugin providing multi-session parallel coding workflow (Reviewer/Worker roles, dispatch protocol, structured logging) over `claude-peers-mcp`
+- **Tech stack**: Pure markdown plugin (no build step), PowerShell + bash launcher scripts, Git as synchronization primitive. Depends on `claude-peers-mcp` (Bun/TypeScript, external).
+- **Architecture quick-take**: 5 slash commands under `plugins/claude-multi-session/commands/multi-session/` (init, audit, roll-call, bootstrap, status), 11 template files in `plugins/claude-multi-session/templates/.claude-multi-session/` (3 roles, 3 messages, 4 log formats, 1 workflow doc), 2 launcher scripts in `plugins/claude-multi-session/scripts/`. No runtime code — logic lives in command prompt files. Root `.claude-multi-session/` is the dogfood copy for this repo's own workflow.
+- **Hotspots** (last 30 commits):
+  - `PROGRESS.md` (8 commits) — updated by every milestone + reviewer
+  - `plugins/.../commands/multi-session/audit.md` (4 commits) — most-iterated command
+  - `plugins/.../templates/.claude-multi-session/messages/dispatch.md` (3 commits)
+  - `CHANGELOG.md` (3 commits)
+  - `plugins/.../templates/.claude-multi-session/workflow.md` (2 commits)
+- **現狀**:
+  - **Done**: Plugin scaffolding, 5 commands, all role/message/log templates, cross-platform launchers, worktree isolation model, ADR-001 implemented in audit.md, QUICKSTART, README, CHANGELOG
+  - **Half-done**: Root `.claude-multi-session/` templates stuck at v0.1.0 (missing worktree model, updated rules from v0.2.0 plugin source)
+  - **Not started**: Automated tests, CI, upgrade path for existing projects, dispatch/review/self-check helper commands
+- **已知限制**: None stated by user. Observed: root template drift should be fixed without diverging from plugin source templates.
 - **Recommended worker count**: 3 (see parallelism analysis below)
 
 ## Milestones
 
-### M1.1 — Add `.gitignore` for repo hygiene
-- [x] <!-- ta07g674 --> 「註」 Focused gitignore: OS files (.DS_Store, Thumbs.db), Obsidian workspace state (workspace.json, workspace-mobile.json), node_modules/, editor configs (.vscode/, .idea/). Kept minimal — no boilerplate dump.
-- **Expected files**: `.gitignore`
+### M1.1 — Sync root `.claude-multi-session/` templates to v0.2.0 plugin source
+- [ ] 「註」
+- **Expected files**: `.claude-multi-session/workflow.md`, `.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/roles/worker.md`, `.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/review-pass.md`, `.claude-multi-session/log-templates/atomic.md`
 - **Acceptance**:
-  - `.gitignore` exists at repo root with entries for: OS files (`.DS_Store`, `Thumbs.db`), Obsidian workspace state (`docs/.obsidian/workspace.json`, `docs/.obsidian/workspace-mobile.json`), `node_modules/`, editor configs (`.vscode/`, `.idea/`)
-  - `git status` no longer shows untracked noise files (if any existed)
+  - Each root `.claude-multi-session/` file is byte-identical to its counterpart under `plugins/claude-multi-session/templates/.claude-multi-session/`
+  - `diff -r .claude-multi-session/ plugins/claude-multi-session/templates/.claude-multi-session/` returns no differences
+  - Files not changed in v0.2.0 (e.g. `project-manager.md`, `completion-report.md`, `daily.md`, `pitfall.md`, `reviewer-master.md`) remain untouched
 - **Effort**: S
-- **ROI**: high — prevents accidental commits of per-user state (Obsidian workspace, OS metadata) that cause noise in diffs and merge conflicts
+- **ROI**: high — the repo's own multi-session workflow uses outdated v0.1.0 templates; any future dogfood session will run on stale instructions
 
-### M2.1 — Replace WPF-specific examples in templates with framework-agnostic ones
-- [x] <!-- uogks3hf --> 「註」Replaced all WPF/XAML/DataTrigger examples with generic ones: env-var-shadow pitfall, Redis cache decisions, REST API pagination patterns. Also cleaned daily.md (DependencyProperty, BeginAnimation, DrawingVisual, App.xaml). Template structure preserved unchanged.
-- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/pitfall.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/atomic.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/reviewer-master.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/completion-report.md`
+### M1.2 — Add `/multi-session:upgrade` command
+- [ ] 「註」
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/upgrade.md`
 - **Acceptance**:
-  - No references to WPF, DataTrigger, MultiBinding, XAML, DependencyProperty, `App.xaml`, or `.csproj` remain in any template file under `plugins/claude-multi-session/templates/`
-  - Replacement examples are generic (e.g. a "database connection string stored in env var instead of config file" pitfall, or a "REST API pagination off-by-one" example) and still illustrate the template structure clearly
-  - Template markdown structure (frontmatter fields, section headings, placeholder tokens) is unchanged — only the example content differs
+  - Command reads both `plugins/claude-multi-session/templates/.claude-multi-session/` (source) and `.claude-multi-session/` (live) directories
+  - Shows a diff summary per file (unchanged / modified / new / deleted)
+  - Asks user for confirmation before overwriting each changed file (or offers "apply all")
+  - Handles edge cases: `.claude-multi-session/` doesn't exist (tell user to run init first), source and live are already identical (report "already up to date")
+  - `allowed-tools` frontmatter includes only Read, Bash(diff:*), Write, Edit, AskUserQuestion
 - **Effort**: M
-- **ROI**: high — current WPF examples confuse users applying the plugin to non-WPF projects and make the plugin look domain-specific rather than general-purpose
+- **ROI**: high — without this, users on v0.1.0 scaffolds must manually delete and re-init to get v0.2.0 templates, losing any customizations
 
-### M3.1 — Add bash/zsh launcher script for macOS/Linux
-- [x] <!-- 20c59hcc --> 「註」bash launcher `scripts/claude-peers` (no extension) mirrors PS1 behavior: `-id` arg, env var, `exec` passthrough. README § Launcher updated with platform table.
-- **Expected files**: `plugins/claude-multi-session/scripts/claude-peers` (no extension, Unix-idiomatic), `README.md`
+### M2.1 — Add template structure validation script
+- [ ] 「註」
+- **Expected files**: `tests/validate-templates.sh` (or `tests/validate-templates.js`), `tests/README.md`
 - **Acceptance**:
-  - `claude-peers` (no extension) exists under `scripts/`, is executable (`chmod +x`), accepts `-id <name>` and optional extra args, sets `CLAUDE_PEERS_PEER_ID` env var, launches `claude` with `--dangerously-skip-permissions --dangerously-load-development-channels server:claude-peers`
-  - Behavior mirrors `claude-peers.ps1` (same flags, same env var, same passthrough of extra args). User-facing command name is `claude-peers -id reviewer` on both OS.
-  - `README.md` § "Launcher" updated to mention both scripts: `.ps1` for Windows, extensionless for macOS/Linux
-- **Effort**: S
-- **ROI**: high — plugin is currently Windows-only in practice; macOS/Linux users can't use the launcher without writing their own wrapper
-
-### M3.2 — Expand QUICKSTART.md with macOS/Linux sections
-- [x] <!-- 20c59hcc --> 「註」All 8 steps updated: platform-split headers for Bun install, Git install, claude-peers-mcp clone/register, launcher install (full macOS/Linux PATH + chmod section). Steps 4/6/7 marked platform-neutral with `sh` blocks. Troubleshooting items split per-platform.
-- **Expected files**: `QUICKSTART.md`
-- **Acceptance**:
-  - Each numbered step (1-8) has a macOS/Linux variant or a note that it's platform-neutral
-  - Step 1 (Install Bun) shows `curl -fsSL https://bun.sh/install | bash` for macOS/Linux
-  - Step 5 (launcher install) references `claude-peers` (no extension) and explains `PATH` setup for bash/zsh (e.g. `~/bin` or `~/.local/bin`, `chmod +x`)
-  - Platform-specific commands (PowerShell syntax, `$HOME` vs `~`, `$env:` vs `export`) are clearly split with headers or tabs
+  - Script validates all files under `plugins/claude-multi-session/`: command files have `allowed-tools` + `description` frontmatter, template files have required sections per type, all file paths referenced in `init.md` exist in `templates/`
+  - Script detects regression: no WPF/XAML/DataTrigger terms in any template (regression guard from v0.1.0 cleanup)
+  - Script exits 0 on pass, non-zero on failure with clear error messages identifying the failing file and reason
+  - Running the script against the current repo passes (exit 0)
 - **Effort**: M
-- **ROI**: high — the quickstart is the primary onboarding path; a Windows-only guide blocks half the potential user base
+- **ROI**: medium — catches template structure regressions that code review misses; foundation for CI
 
-### M4.1 — Add `/multi-session:status` command
-- [x] <!-- ta07g674 --> 「註」 Read-only command (allowed-tools: Read, Bash(git:*)). Parses frontmatter skip/in_progress lists + milestone checkboxes + session comments. Outputs ✅/🔄/⬜ table + counts. ~30 line cap enforced in behavior rules.
-- **Expected files**: `plugins/claude-multi-session/commands/multi-session/status.md`
+### M2.2 — Add GitHub Actions CI workflow for template validation
+- [ ] 「註」
+- **Expected files**: `.github/workflows/validate.yml`
 - **Acceptance**:
-  - Running `/multi-session:status` reads `PROGRESS.md` and prints: current phase (audit / dispatching / wrap-up), milestone summary table (ID, description, status checkbox, assigned session if noted in 「註」), count of completed/in-progress/remaining/skipped
-  - Command uses only `Read` and `Bash(git:*)` tools (no code writing, no peer messaging)
-  - Output is concise enough to fit in one screen (~30 lines max)
+  - Workflow triggers on push to `main` and on pull requests
+  - Runs the validation script from M2.1 (`tests/validate-templates.sh` or equivalent)
+  - Also runs `diff -r .claude-multi-session/ plugins/claude-multi-session/templates/.claude-multi-session/` and fails if root templates drift from plugin source
+  - Workflow passes on current repo state (no pre-existing failures)
 - **Effort**: S
-- **ROI**: medium — convenient for Reviewer mid-session but `Read PROGRESS.md` works fine as a manual fallback
+- **ROI**: medium — prevents template drift from recurring; PR gate catches issues before merge
 
-### M5.1 — Add CHANGELOG.md covering existing commit history
-- [x] <!-- uogks3hf --> 「註」Keep a Changelog format, [Unreleased] + [0.1.0] sections. Covers all 18 commits grouped into Added (11), Changed (4), Fixed (3). Includes M1.1/M2.1/M3.1 wave-1 work.
-- **Expected files**: `CHANGELOG.md`
+### M3.1 — Add `/multi-session:dispatch` helper command
+- [ ] 「註」
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
 - **Acceptance**:
-  - `CHANGELOG.md` exists at repo root, follows Keep a Changelog format (`## [Unreleased]` + `## [0.1.0] - 2026-05-25` or similar)
-  - Covers the 14 existing commits grouped by type (Added, Changed, Fixed)
-  - Key entries: plugin scaffolding, marketplace manifest, init/audit/roll-call commands, PowerShell launcher, QUICKSTART, git pre-check on init, Obsidian vault support
-- **Effort**: S
-- **ROI**: medium — provides release context for users and contributors; not blocking but expected for any published plugin
-
-### M6.1 — Add pitfall entry for PROGRESS.md shared-worktree race condition
-- [x] <!-- ta07g674 --> 「註」 Pitfall entry: symptom (silent cross-worker PROGRESS.md edit leakage), root cause (shared worktree = no physical file isolation), fix (worktree-per-worker model in M6.2–M6.4). Category workflow, severity high, status resolved.
-- **Expected files**: `docs/pitfalls/progress-md-race.md`
-- **Acceptance**:
-  - Pitfall entry exists with: symptom (concurrent workers on one branch pick up each other's uncommitted PROGRESS.md edits), root cause (shared working tree), fix (worktree-per-worker model), severity high, status resolved
-  - Uses the pitfall template format from `.claude-multi-session/log-templates/pitfall.md`
-- **Effort**: S
-- **ROI**: high — documents the race condition discovered this session; prevents future teams from hitting it
-
-### M6.2 — Update workflow.md + roles (reviewer.md, worker.md) for worktree + per-worker branch model
-- [x] <!-- uogks3hf --> 「註」workflow.md: new Worktree lifecycle section (setup/execute/review/cleanup), updated state machine, PROGRESS.md write strategy, pitfall table. reviewer.md: added create worktrees, merge --ff-only on pass, cleanup responsibilities + common mistakes. worker.md: step 0 verify worktree, rebase before milestone, commit to session branch + common mistakes. Language consistent across all 3.
-- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`, `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`
-- **Acceptance**:
-  - workflow.md has new "Worktree lifecycle" section: `git worktree add`, branch naming `session/<id>`, Reviewer merge flow, cleanup
-  - workflow.md state machine updated: dispatch creates worktree+branch, execute happens on worker branch, review includes merge to main
-  - workflow.md pitfall table updated: "Race on PROGRESS.md" row points to structural fix (worktree model)
-  - reviewer.md adds: worktree creation before first dispatch, `git merge --ff-only` on review pass, `git worktree remove` + branch delete on session close
-  - worker.md adds: step 0 verify worktree (`pwd` check), commit to `session/<id>` branch not main, `git rebase main` before each milestone
-  - Language consistent across all 3 files
+  - Command reads PROGRESS.md, extracts remaining (unchecked) milestones, and lists them with expected files
+  - Checks file-region overlap between remaining milestones and `in_progress:` milestones (from frontmatter); flags conflicts
+  - Generates a pre-filled dispatch message (using `dispatch.md` template) for a user-selected milestone + worker, with "don't touch" list auto-populated from in-progress milestones' file regions
+  - Does NOT auto-send — outputs the message for Reviewer to review, edit, and manually `send_message`
+  - `allowed-tools` includes Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers (to discover available workers)
 - **Effort**: M
-- **ROI**: high — core workflow change, everything else depends on this being correct
+- **ROI**: high — reduces Reviewer cognitive load on the most error-prone step (file-region conflict checking is manual and tedious with 3+ workers)
 
-### M6.3 — Update message templates (dispatch.md, review-pass.md) + atomic.md for worktree model
-- [x] <!-- 20c59hcc --> 「註」dispatch.md: worktree verify step 0 in pre-block + branch commit rule. review-pass.md: merge-first sequence (`--ff-only`) + session-close cleanup section. atomic.md: `branch: session/<id>` frontmatter + branch rule-compliance line.
-- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/review-pass.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/atomic.md`
+### M3.2 — Add `/multi-session:self-check` worker pre-commit validation command
+- [ ] 「註」
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/self-check.md`
 - **Acceptance**:
-  - dispatch.md has new "Worktree setup pre-block" (parallel to first-dispatch pre-block): verify `pwd` is worker's worktree, `git branch --show-current` equals `session/<id>`
-  - dispatch.md rules section updated for branch-based commits
-  - review-pass.md after-pass actions updated: merge → push → optionally worktree remove + branch delete
-  - atomic.md frontmatter gains `branch: session/<id>` field
-  - atomic.md rule-compliance block gains "Committed to `session/<id>` branch (not main) ✓"
+  - Command reads the most recent dispatch message context (from conversation) or accepts milestone ID as argument
+  - Validates: changed files match dispatched scope (`git diff --stat` vs expected files), commit message format matches `^Mx.y: `, PROGRESS.md checkbox updated, atomic log file exists at expected path
+  - Outputs a pass/fail checklist matching the auto-pass criteria format from `dispatch.md`
+  - `allowed-tools` includes only Read, Bash(git:*), Bash(test:*) — no write access
 - **Effort**: S
-- **ROI**: high — dispatch/review templates are the primary worker interface
+- **ROI**: medium — catches common Worker mistakes (missing atomic log, wrong commit format) before Reviewer review, reducing review-fail round-trips
 
-### M6.4 — Update CHANGELOG.md with worktree model changes
-- [x] <!-- ta07g674 --> 「註」 [Unreleased] section: Added (worktree model, /status command, pitfall entry) + Changed (workflow.md, reviewer.md, worker.md, dispatch.md, review-pass.md, atomic.md). [0.1.0] untouched.
-- **Expected files**: `CHANGELOG.md`
+### M3.3 — Add `/multi-session:review` helper command
+- [ ] 「註」
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
 - **Acceptance**:
-  - `[Unreleased]` section updated with: "Added: git worktree + per-worker branch isolation model (prevents PROGRESS.md race condition)" and lists all changed template files
-  - Existing `[0.1.0]` section untouched
-- **Effort**: S
-- **ROI**: medium — keeps changelog current
+  - Command accepts a milestone ID and worker session branch (e.g. `session/sessionA`), reads PROGRESS.md acceptance criteria for that milestone
+  - Runs `git log main..session/<id> --stat` and `git diff main..session/<id>` and compares against acceptance criteria
+  - Generates a pre-filled review verdict message (using `review-pass.md` template) — Reviewer edits and sends manually
+  - On pass, offers to run `git merge --ff-only session/<id>` (with user confirmation before executing)
+  - `allowed-tools` includes Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers
+- **Effort**: M
+- **ROI**: medium — structured review process reduces time per review cycle; merge automation prevents `--ff-only` forgetting (a documented common mistake)
 
-## Parallelism analysis (Wave 3)
+## Parallelism analysis
 
-- Max independent file-region set: **3 milestones** (M6.1, M6.3, M6.4 — separate files)
+- Max independent file-region set: **7 milestones** — all milestones touch entirely separate files. No file overlap between any pair.
 - Sequencing constraints:
-  - M6.3 depends on M6.2: dispatch.md and review-pass.md must reference the same worktree lifecycle defined in workflow.md/roles. M6.2 establishes the model, M6.3 applies it to templates.
-  - M6.1 (pitfall) and M6.4 (CHANGELOG) are independent of everything.
-- **Recommendation**: Wave 3a: M6.1 + M6.2 in parallel (no overlap). Wave 3b: M6.3 + M6.4 after M6.2 lands.
+  - M2.2 depends on M2.1: CI workflow runs the validation script that M2.1 creates
+  - M1.2 benefits from M1.1 being done first (upgrade command logic is informed by the actual drift pattern), but files are independent
+  - All M3.x milestones are fully independent of each other and all M1.x / M2.x milestones
+- Wave plan (3 workers):
+  - **Wave 1**: M1.1 + M2.1 + M3.1 (3 workers, no overlap, no dependencies)
+  - **Wave 2**: M1.2 + M2.2 + M3.2 (3 workers, no overlap; M2.2 satisfied by M2.1 from Wave 1)
+  - **Wave 3**: M3.3 (1 worker; or fold into Wave 2 if a worker finishes early)
+- **Recommendation**: spin up 3 workers (`claude-peers -id sessionA / sessionB / sessionC`)
 
 ## 待用戶決定 / Pending user decision
 
@@ -136,6 +128,4 @@ all 10 milestones complete (M1.1–M6.4). 3 workers, 3 waves, 0 failures, 0 git 
 
 ## 設計決策變更紀錄 / Decision changelog
 
-- **2026-05-25 — Launcher naming**: bash launcher 用 `claude-peers`（無副檔名，Unix 慣例）；PowerShell 保留 `claude-peers.ps1`。使用者 PATH 看到的命令名一致：`claude-peers -id reviewer`，兩個檔案內部分別處理 OS。
-- **2026-05-25 — 版號 scheme**: 0.1.0 起步，SemVer。plugin status 標 `pre-release / iterating`，0.x 階段允許 breaking changes。第一個 stable release 升 1.0.0。
-- **2026-05-25 — Worktree isolation model**: 從共用 working tree + 單一 branch 改為 git worktree + per-worker branch。每個 worker 有自己的 worktree（`../worker-<id>`），commit 到 `session/<id>` branch，Reviewer review pass 後 `git merge --ff-only` 回 main。解決 PROGRESS.md race condition（見 [[progress-md-race]]）。Launcher 不自動建 worktree — 由 Reviewer dispatch 時處理。
+(Empty at audit time.)
