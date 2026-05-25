@@ -41,7 +41,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — the repo's own multi-session workflow uses outdated v0.1.0 templates; any future dogfood session will run on stale instructions
 
 ### M1.2 — Add `/multi-session:upgrade` command
-- [ ] 「註」
+- [x] <!-- sessionA --> 「註」Slash command at `upgrade.md`. Flow: pre-flight check → diff each file (unchanged/modified/new/removed) → summary table → AskUserQuestion (apply all / review each / cancel) → apply with per-file or bulk overwrite → report. Follows init.md/status.md format conventions. allowed-tools: Read, Bash(diff/ls/test/cp), Write, Edit, AskUserQuestion.
 - **Expected files**: `plugins/claude-multi-session/commands/multi-session/upgrade.md`
 - **Acceptance**:
   - Command reads both `plugins/claude-multi-session/templates/.claude-multi-session/` (source) and `.claude-multi-session/` (live) directories
