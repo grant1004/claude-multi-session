@@ -102,7 +102,7 @@ M1.1–M5.1 complete. Wave 3 dispatching: M6.1–M6.4 (worktree isolation model)
 - **ROI**: high — core workflow change, everything else depends on this being correct
 
 ### M6.3 — Update message templates (dispatch.md, review-pass.md) + atomic.md for worktree model
-- [ ] <!-- sessionN -->
+- [x] <!-- 20c59hcc --> 「註」dispatch.md: worktree verify step 0 in pre-block + branch commit rule. review-pass.md: merge-first sequence (`--ff-only`) + session-close cleanup section. atomic.md: `branch: session/<id>` frontmatter + branch rule-compliance line.
 - **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/review-pass.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/atomic.md`
 - **Acceptance**:
   - dispatch.md has new "Worktree setup pre-block" (parallel to first-dispatch pre-block): verify `pwd` is worker's worktree, `git branch --show-current` equals `session/<id>`
