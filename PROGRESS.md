@@ -64,7 +64,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: medium — catches template structure regressions that code review misses; foundation for CI
 
 ### M2.2 — Add GitHub Actions CI workflow for template validation
-- [ ] 「註」
+- [x] 「註」ubuntu-latest, 2 steps: (1) bash tests/validate-templates.sh, (2) diff -r root vs plugin templates. Triggers on push to main + PRs. No deps needed.
 - **Expected files**: `.github/workflows/validate.yml`
 - **Acceptance**:
   - Workflow triggers on push to `main` and on pull requests

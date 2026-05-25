@@ -1,0 +1,23 @@
+name: Validate templates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run template structure validation
+        run: bash tests/validate-templates.sh
+
+      - name: Check root templates match plugin source
+        run: |
+          diff -r .claude-multi-session/ plugins/claude-multi-session/templates/.claude-multi-session/
+          if [ $? -ne 0 ]; then
+            echo "::error::Root templates (.claude-multi-session/) have drifted from plugin source (plugins/claude-multi-session/templates/.claude-multi-session/). Re-sync them."
+            exit 1
+          fi
