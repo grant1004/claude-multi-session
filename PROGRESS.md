@@ -1,14 +1,14 @@
 ---
 skipped: []
-in_progress: [M1.2, M2.2, M3.2]
-completed: [M1.1, M2.1, M3.1]
+in_progress: []
+completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-audit phase complete — awaiting user to select milestones for dispatch.
+all 7 milestones complete (M1.1–M3.3). 3 workers, 3 waves, 0 failures, 0 git conflicts.
 
 ## Audit summary
 
