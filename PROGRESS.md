@@ -98,7 +98,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: medium — catches common Worker mistakes (missing atomic log, wrong commit format) before Reviewer review, reducing review-fail round-trips
 
 ### M3.3 — Add `/multi-session:review` helper command
-- [ ] 「註」
+- [x] 「註」9-step flow: select milestone+branch → read acceptance criteria → git log/diff → per-criterion verdict (met/partial/not met) with evidence → recommend pass/fail/hold → generate review-pass.md format message → optional git merge --ff-only with user confirm. Read-only except merge step. Follows dispatch.md pattern (AskUserQuestion for selection, fenced code block output).
 - **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
 - **Acceptance**:
   - Command accepts a milestone ID and worker session branch (e.g. `session/sessionA`), reads PROGRESS.md acceptance criteria for that milestone
