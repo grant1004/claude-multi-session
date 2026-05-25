@@ -1,7 +1,7 @@
 ---
 title: "ADR-001: Audit 重設計 — grill 環節 + codebase-memory + catchup mode"
 date: 2026-05-26
-status: accepted
+status: implemented
 ---
 
 # ADR-001: Audit 重設計

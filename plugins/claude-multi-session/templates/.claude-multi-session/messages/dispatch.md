@@ -42,7 +42,7 @@ Confirm via send_message back: "✅ Onboarded, starting Mx.y" — then start. Th
 - <file / region 1> (sessionM is editing)
 - <file / region 2>
 
-🔒 規則提醒 (rules — non-negotiable, all five required):
+🔒 規則提醒 (rules — non-negotiable, all six required):
 1. Only do Mx.y; stop and report when done. No scope creep.
 2. Build 0 error required before commit (<build command>).
 3. Commit message format: `Mx.y: <description>`.
@@ -50,6 +50,7 @@ Confirm via send_message back: "✅ Onboarded, starting Mx.y" — then start. Th
 5. Same commit must include:
    - `PROGRESS.md` checkbox update (Mx.y `[ ] → [x]`) + 「註」 column with implementation notes
    - **Atomic log file** at `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` (use template `.claude-multi-session/log-templates/atomic.md`)
+6. Acceptance criteria 含可執行測試（e.g. `npm test`, `curl ...`）→ 測試必須 pass 才能 commit。
 
 If you skip the atomic log or PROGRESS.md update, the review will fail and you'll redo the commit. This is enforced — not optional.
 
