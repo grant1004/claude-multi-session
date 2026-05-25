@@ -8,7 +8,7 @@ completed: [M1.1, M2.1, M3.1, M3.2, M4.1, M5.1]
 
 ## 現在進度
 
-all 6 milestones complete (M1.1–M5.1). 3 workers, 2 waves, 0 failures, 0 git conflicts.
+M1.1–M5.1 complete. Wave 3 dispatching: M6.1–M6.4 (worktree isolation model).
 
 ## Audit summary
 
@@ -79,19 +79,63 @@ all 6 milestones complete (M1.1–M5.1). 3 workers, 2 waves, 0 failures, 0 git c
 - **Effort**: S
 - **ROI**: medium — provides release context for users and contributors; not blocking but expected for any published plugin
 
-## Parallelism analysis
+### M6.1 — Add pitfall entry for PROGRESS.md shared-worktree race condition
+- [x] <!-- ta07g674 --> 「註」 Pitfall entry: symptom (silent cross-worker PROGRESS.md edit leakage), root cause (shared worktree = no physical file isolation), fix (worktree-per-worker model in M6.2–M6.4). Category workflow, severity high, status resolved.
+- **Expected files**: `docs/pitfalls/progress-md-race.md`
+- **Acceptance**:
+  - Pitfall entry exists with: symptom (concurrent workers on one branch pick up each other's uncommitted PROGRESS.md edits), root cause (shared working tree), fix (worktree-per-worker model), severity high, status resolved
+  - Uses the pitfall template format from `.claude-multi-session/log-templates/pitfall.md`
+- **Effort**: S
+- **ROI**: high — documents the race condition discovered this session; prevents future teams from hitting it
 
-- Max independent file-region set: **5 milestones** (M1.1, M2.1, M3.1, M4.1, M5.1 — all touch entirely separate files)
+### M6.2 — Update workflow.md + roles (reviewer.md, worker.md) for worktree + per-worker branch model
+- [ ] <!-- sessionN -->
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`, `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`
+- **Acceptance**:
+  - workflow.md has new "Worktree lifecycle" section: `git worktree add`, branch naming `session/<id>`, Reviewer merge flow, cleanup
+  - workflow.md state machine updated: dispatch creates worktree+branch, execute happens on worker branch, review includes merge to main
+  - workflow.md pitfall table updated: "Race on PROGRESS.md" row points to structural fix (worktree model)
+  - reviewer.md adds: worktree creation before first dispatch, `git merge --ff-only` on review pass, `git worktree remove` + branch delete on session close
+  - worker.md adds: step 0 verify worktree (`pwd` check), commit to `session/<id>` branch not main, `git rebase main` before each milestone
+  - Language consistent across all 3 files
+- **Effort**: M
+- **ROI**: high — core workflow change, everything else depends on this being correct
+
+### M6.3 — Update message templates (dispatch.md, review-pass.md) + atomic.md for worktree model
+- [ ] <!-- sessionN -->
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/review-pass.md`, `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/atomic.md`
+- **Acceptance**:
+  - dispatch.md has new "Worktree setup pre-block" (parallel to first-dispatch pre-block): verify `pwd` is worker's worktree, `git branch --show-current` equals `session/<id>`
+  - dispatch.md rules section updated for branch-based commits
+  - review-pass.md after-pass actions updated: merge → push → optionally worktree remove + branch delete
+  - atomic.md frontmatter gains `branch: session/<id>` field
+  - atomic.md rule-compliance block gains "Committed to `session/<id>` branch (not main) ✓"
+- **Effort**: S
+- **ROI**: high — dispatch/review templates are the primary worker interface
+
+### M6.4 — Update CHANGELOG.md with worktree model changes
+- [ ] <!-- sessionN -->
+- **Expected files**: `CHANGELOG.md`
+- **Acceptance**:
+  - `[Unreleased]` section updated with: "Added: git worktree + per-worker branch isolation model (prevents PROGRESS.md race condition)" and lists all changed template files
+  - Existing `[0.1.0]` section untouched
+- **Effort**: S
+- **ROI**: medium — keeps changelog current
+
+## Parallelism analysis (Wave 3)
+
+- Max independent file-region set: **3 milestones** (M6.1, M6.3, M6.4 — separate files)
 - Sequencing constraints:
-  - M3.2 depends on M3.1 — both touch `README.md`, and M3.2's QUICKSTART content references the bash launcher created by M3.1
-  - All other milestones are fully independent
-- **Recommendation**: spin up **3 workers** (`claude-peers -id sessionA / sessionB / sessionC`). Wave 1: dispatch M1.1 + M2.1 + M3.1 in parallel (all independent). Wave 2: dispatch M3.2 + M4.1 + M5.1 (M3.2 now safe because M3.1 is done; M4.1 and M5.1 are independent of everything).
+  - M6.3 depends on M6.2: dispatch.md and review-pass.md must reference the same worktree lifecycle defined in workflow.md/roles. M6.2 establishes the model, M6.3 applies it to templates.
+  - M6.1 (pitfall) and M6.4 (CHANGELOG) are independent of everything.
+- **Recommendation**: Wave 3a: M6.1 + M6.2 in parallel (no overlap). Wave 3b: M6.3 + M6.4 after M6.2 lands.
 
 ## 待用戶決定 / Pending user decision
 
-(None — all decisions resolved.)
+(None.)
 
 ## 設計決策變更紀錄 / Decision changelog
 
 - **2026-05-25 — Launcher naming**: bash launcher 用 `claude-peers`（無副檔名，Unix 慣例）；PowerShell 保留 `claude-peers.ps1`。使用者 PATH 看到的命令名一致：`claude-peers -id reviewer`，兩個檔案內部分別處理 OS。
 - **2026-05-25 — 版號 scheme**: 0.1.0 起步，SemVer。plugin status 標 `pre-release / iterating`，0.x 階段允許 breaking changes。第一個 stable release 升 1.0.0。
+- **2026-05-25 — Worktree isolation model**: 從共用 working tree + 單一 branch 改為 git worktree + per-worker branch。每個 worker 有自己的 worktree（`../worker-<id>`），commit 到 `session/<id>` branch，Reviewer review pass 後 `git merge --ff-only` 回 main。解決 PROGRESS.md race condition（見 [[progress-md-race]]）。Launcher 不自動建 worktree — 由 Reviewer dispatch 時處理。
