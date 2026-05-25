@@ -31,7 +31,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 ## Milestones
 
 ### M1.1 — Sync root `.claude-multi-session/` templates to v0.2.0 plugin source
-- [ ] 「註」
+- [x] <!-- sessionA --> 「註」Copied all 10 template files (not just 6 dispatched) from plugin source to root `.claude-multi-session/`. 4 extra files (daily.md, pitfall.md, reviewer-master.md, completion-report.md) also had WPF→generic example diffs from M2.1. All files now byte-identical (`diff -r` verified).
 - **Expected files**: `.claude-multi-session/workflow.md`, `.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/roles/worker.md`, `.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/review-pass.md`, `.claude-multi-session/log-templates/atomic.md`
 - **Acceptance**:
   - Each root `.claude-multi-session/` file is byte-identical to its counterpart under `plugins/claude-multi-session/templates/.claude-multi-session/`
