@@ -87,7 +87,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — reduces Reviewer cognitive load on the most error-prone step (file-region conflict checking is manual and tedious with 3+ workers)
 
 ### M3.2 — Add `/multi-session:self-check` worker pre-commit validation command
-- [ ] 「註」
+- [x] <!-- sessionC --> 「註」Read-only command (allowed-tools: Read, Bash(git:*), Bash(test:*)). 6-step flow: determine milestone ID (arg/context/git) → derive session ID from branch → read PROGRESS.md expected files → run 4 validation checks (file scope match, commit message format, PROGRESS.md checkbox, atomic log existence+frontmatter) → output structured pass/fail checklist. Auto-detects pre-commit vs post-commit mode from git state. Special allowances for PROGRESS.md and session-logs (always in scope). Warnings (⚠️) for non-critical issues vs hard fails (❌).
 - **Expected files**: `plugins/claude-multi-session/commands/multi-session/self-check.md`
 - **Acceptance**:
   - Command reads the most recent dispatch message context (from conversation) or accepts milestone ID as argument
