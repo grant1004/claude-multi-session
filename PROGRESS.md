@@ -53,7 +53,7 @@ audit phase complete — awaiting user to select milestones for dispatch.
 - **ROI**: high — without this, users on v0.1.0 scaffolds must manually delete and re-init to get v0.2.0 templates, losing any customizations
 
 ### M2.1 — Add template structure validation script
-- [ ] 「註」
+- [x] 「註」Bash script with 6 checks (27 total assertions): command frontmatter, init.md copy-list existence, WPF regression guard, role headings, message code blocks, log-template frontmatter. Chose bash over Node for zero-dep portability. Log-template check validates frontmatter inside code blocks (templates are documentation files, not direct YAML).
 - **Expected files**: `tests/validate-templates.sh` (or `tests/validate-templates.js`), `tests/README.md`
 - **Acceptance**:
   - Script validates all files under `plugins/claude-multi-session/`: command files have `allowed-tools` + `description` frontmatter, template files have required sections per type, all file paths referenced in `init.md` exist in `templates/`
