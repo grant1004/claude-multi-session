@@ -1,7 +1,7 @@
 ---
 skipped: []
-in_progress: [M1.1, M2.1, M3.1]
-completed: []
+in_progress: [M1.2, M2.2, M3.2]
+completed: [M1.1, M2.1, M3.1]
 ---
 
 # PROGRESS
