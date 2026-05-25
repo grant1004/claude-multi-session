@@ -7,18 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-26
+
 ### Added
 
-- Git worktree + per-worker branch isolation model — each Worker gets a dedicated worktree (`session/<id>` branch), Reviewer merges via `--ff-only` after review pass (prevents PROGRESS.md race condition, see `docs/pitfalls/progress-md-race.md`)
+- Git worktree + per-worker branch isolation model — each Worker gets a dedicated worktree (`../worker-<id>` path, `session/<id>` branch), Reviewer merges via `--ff-only` after review pass (prevents PROGRESS.md race condition, see `docs/pitfalls/progress-md-race.md`)
 - `/multi-session:status` slash command — read-only dashboard showing current phase, milestone table with status icons, and counts
 - `docs/pitfalls/progress-md-race.md` — pitfall entry documenting the shared-worktree race condition discovered during Wave 1–2
+- ADR-001 (`docs/adr/001-audit-redesign.md`) — audit redesign decision record: grill phase, codebase-memory MCP three-tier integration, catchup vs new-project auto-mode, embedded test specs
 
 ### Changed
 
+- **BREAKING**: Workflow now requires per-worker git worktrees. Projects scaffolded with v0.1.0 must opt in by switching to the new dispatch flow (Reviewer creates worktree + branch before first dispatch to each Worker).
 - Updated `workflow.md` state machine with worktree lifecycle: create worktree+branch at dispatch, execute on worker branch, merge to main on review pass, cleanup on session close
 - Updated `reviewer.md` and `worker.md` role definitions for worktree setup, branch-based commits, and rebase-before-milestone flow
 - Updated `dispatch.md` and `review-pass.md` message templates for per-worker branch workflow
 - Updated `atomic.md` log template with `branch:` frontmatter field and branch-based compliance check
+- Redesigned `/multi-session:audit` per ADR-001: mandatory grill phase via AskUserQuestion (5 user-intent questions), automatic catchup-vs-new-project mode detection from git history, codebase-memory MCP integration (try → ask → fallback), test spec embedded directly in acceptance criteria
+
+### Fixed
+
+- Aligned worktree path convention in `docs/pitfalls/progress-md-race.md` example with `reviewer.md` / `dispatch.md` (`../worker-<id>` instead of `.worktrees/<id>`)
 
 ## [0.1.0] - 2026-05-25
 

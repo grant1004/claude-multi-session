@@ -27,9 +27,11 @@ This is not a bug in git — it's a fundamental property of a shared working tre
 Each worker gets their own git worktree on a dedicated branch (`session/<id>`). The Reviewer merges completed branches into `main` after review pass.
 
 ```
-git worktree add .worktrees/sessionA -b session/sessionA
-git worktree add .worktrees/sessionB -b session/sessionB
+git worktree add ../worker-sessionA -b session/sessionA main
+git worktree add ../worker-sessionB -b session/sessionB main
 ```
+
+(Worktree path convention: `../worker-<id>` — sibling to the main worktree, not nested inside it. Matches `reviewer.md` / `dispatch.md`.)
 
 With separate worktrees:
 - Worker A's `git add PROGRESS.md` only sees Worker A's edits (different filesystem directory)
