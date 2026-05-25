@@ -114,7 +114,7 @@ M1.1–M5.1 complete. Wave 3 dispatching: M6.1–M6.4 (worktree isolation model)
 - **ROI**: high — dispatch/review templates are the primary worker interface
 
 ### M6.4 — Update CHANGELOG.md with worktree model changes
-- [ ] <!-- sessionN -->
+- [x] <!-- ta07g674 --> 「註」 [Unreleased] section: Added (worktree model, /status command, pitfall entry) + Changed (workflow.md, reviewer.md, worker.md, dispatch.md, review-pass.md, atomic.md). [0.1.0] untouched.
 - **Expected files**: `CHANGELOG.md`
 - **Acceptance**:
   - `[Unreleased]` section updated with: "Added: git worktree + per-worker branch isolation model (prevents PROGRESS.md race condition)" and lists all changed template files

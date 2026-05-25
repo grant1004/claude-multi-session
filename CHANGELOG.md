@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Git worktree + per-worker branch isolation model — each Worker gets a dedicated worktree (`session/<id>` branch), Reviewer merges via `--ff-only` after review pass (prevents PROGRESS.md race condition, see `docs/pitfalls/progress-md-race.md`)
+- `/multi-session:status` slash command — read-only dashboard showing current phase, milestone table with status icons, and counts
+- `docs/pitfalls/progress-md-race.md` — pitfall entry documenting the shared-worktree race condition discovered during Wave 1–2
+
+### Changed
+
+- Updated `workflow.md` state machine with worktree lifecycle: create worktree+branch at dispatch, execute on worker branch, merge to main on review pass, cleanup on session close
+- Updated `reviewer.md` and `worker.md` role definitions for worktree setup, branch-based commits, and rebase-before-milestone flow
+- Updated `dispatch.md` and `review-pass.md` message templates for per-worker branch workflow
+- Updated `atomic.md` log template with `branch:` frontmatter field and branch-based compliance check
+
 ## [0.1.0] - 2026-05-25
 
 ### Added
