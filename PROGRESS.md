@@ -89,7 +89,7 @@ M1.1–M5.1 complete. Wave 3 dispatching: M6.1–M6.4 (worktree isolation model)
 - **ROI**: high — documents the race condition discovered this session; prevents future teams from hitting it
 
 ### M6.2 — Update workflow.md + roles (reviewer.md, worker.md) for worktree + per-worker branch model
-- [ ] <!-- sessionN -->
+- [x] <!-- uogks3hf --> 「註」workflow.md: new Worktree lifecycle section (setup/execute/review/cleanup), updated state machine, PROGRESS.md write strategy, pitfall table. reviewer.md: added create worktrees, merge --ff-only on pass, cleanup responsibilities + common mistakes. worker.md: step 0 verify worktree, rebase before milestone, commit to session branch + common mistakes. Language consistent across all 3.
 - **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`, `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`
 - **Acceptance**:
   - workflow.md has new "Worktree lifecycle" section: `git worktree add`, branch naming `session/<id>`, Reviewer merge flow, cleanup

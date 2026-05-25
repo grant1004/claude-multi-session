@@ -21,22 +21,35 @@ Full job descriptions: `roles/reviewer.md`, `roles/worker.md`, `roles/project-ma
                        │
 [List peers]       list_peers → find sessionA / sessionB / sessionC ...
                        │
+[Create worktrees] git worktree add ../worker-<id> -b session/<id> main
+                   (one worktree + branch per Worker, before first dispatch)
+                       │
 [Onboard]          send_message to each → "read CLAUDE.md + PROGRESS.md → set_summary"
+                   (include worktree path in first message)
                        │
 [Workers ack]      each worker send_message back → ready + lists candidate milestones
+                   (worker verifies: pwd = ../worker-<id>, branch = session/<id>)
                        │
 [Dispatch wave 1]  Reviewer cross-checks file-region overlap → parallel dispatch
                    (one milestone each, with explicit "don't touch X/Y/Z" list)
                        │
-[Execute]          worker writes code → build 0 error → commit → send_message done
+[Execute]          worker writes code in own worktree → build 0 error
+                   → commit to session/<id> branch → send_message done
                        │
-[Review]           Reviewer reads `git log --stat` + `git diff` → pass / fail
+[Review]           Reviewer reads `git log main..session/<id> --stat` + `git diff`
+                   → pass: git checkout main && git merge --ff-only session/<id>
+                   → fail: send_message with fail reason, worker fixes on same branch
+                       │
+[Pre-next rebase]  worker runs `git rebase main` to pick up merged work
                        │
 [Dispatch wave 2]  next milestone for each worker (or hold / standby)
                    ... loop ...
                        │
 [Wrap up]          all milestones done → each worker writes session-N.md daily summary
                    Reviewer writes review-logs/YYYY-MM-DD.md + updates PROGRESS.md
+                       │
+[Cleanup]          git worktree remove ../worker-<id> && git branch -d session/<id>
+                   (Reviewer runs for each Worker after session close)
 ```
 
 ## File-region partitioning rule
@@ -48,6 +61,46 @@ This is the single most important invariant. Every dispatch:
 3. Spells out "don't touch X / Y / Z" in the dispatch message.
 
 Workers prefer to **hold over scope-creep**: if they need to touch a file outside their dispatched range, they `send_message` Reviewer first.
+
+## Worktree lifecycle
+
+Each Worker operates in an isolated git worktree on a dedicated branch. This eliminates the shared-working-tree race condition (see [[progress-md-race]]) and lets Workers commit freely without interfering with each other.
+
+### Setup (Reviewer, before first dispatch)
+
+```bash
+git worktree add ../worker-<id> -b session/<id> main
+```
+
+This creates:
+- A worktree directory at `../worker-<id>` (sibling to the main repo)
+- A branch `session/<id>` tracking from `main`
+
+The Reviewer includes the worktree path in the first dispatch message so the Worker knows where to `cd`.
+
+### Execution (Worker, per milestone)
+
+1. **Pre-milestone rebase:** `git fetch origin && git rebase main` — pick up other Workers' merged work before starting.
+2. **Work + commit:** Write code, build, commit to `session/<id>`. Commits never go directly to `main`.
+3. **Completion report:** `send_message` Reviewer with commit hash.
+
+### Review + merge (Reviewer, per milestone)
+
+```bash
+git checkout main
+git merge --ff-only session/<id>
+```
+
+`--ff-only` enforces linear history — if the merge cannot fast-forward (Worker forgot to rebase), it fails loudly rather than creating a merge commit. Reviewer asks Worker to rebase and re-report.
+
+### Cleanup (Reviewer, after session close)
+
+```bash
+git worktree remove ../worker-<id>
+git branch -d session/<id>
+```
+
+Use `git worktree list` to audit for leftover worktrees from crashed sessions.
 
 ## Design-decision skip-list
 
@@ -79,20 +132,20 @@ If a Worker discovers mid-execution that the spec is wrong, the dispatch was a m
 
 ## PROGRESS.md write strategy
 
-Race conditions on `PROGRESS.md` are the most common parallel coordination failure. Mitigation:
+With worktree isolation, each Worker edits `PROGRESS.md` in their own worktree — no more shared-working-tree race conditions (see [[progress-md-race]]). However, write-ownership rules remain as defense-in-depth:
 
 - **`現在進度 / current` line** — Reviewer-only. Workers do not edit this line.
 - **Worker checkbox + 「註」** — each Worker only edits the row(s) for their own milestone. The dispatch message must make ownership clear.
 - **Skip-list / Decision changelog** — Reviewer-only.
 
-If you want stronger isolation, use the `.progress/sessionN.md` pattern: each Worker writes only to their own file under `.progress/`, Reviewer merges into `PROGRESS.md` "現在進度" on review pass. Adds latency but zero conflict probability.
+The Reviewer's `git merge --ff-only` integrates each Worker's `PROGRESS.md` edits into main one at a time, so conflicts surface at merge time (fixable) rather than silently corrupting data.
 
 ## Standard pitfalls (and what to do)
 
 | Pitfall | Mitigation |
 |---|---|
 | Reviewer dispatches a skipped milestone | Reviewer must check skip-list before every dispatch |
-| Race on PROGRESS.md | Reviewer-only edits to shared lines; Worker edits scoped to own rows |
+| Race on PROGRESS.md | Structurally eliminated by worktree isolation; see [[progress-md-race]]. Write-ownership rules retained as defense-in-depth |
 | Worker session crashes mid-milestone | Reviewer re-dispatches with explicit "you are new, previous session died" + full task content |
 | Two workers about to modify shared decision-log area | Reviewer broadcasts "X is already editing here" before dispatching the second |
 | Reviewer role not understood at session start | Reviewer reads `roles/reviewer.md` and explicitly states role via `set_summary` |
