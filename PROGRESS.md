@@ -1,14 +1,14 @@
 ---
 skipped: []
 in_progress: []
-completed: [M1.1, M2.1, M3.1, M3.2, M4.1, M5.1]
+completed: [M1.1, M2.1, M3.1, M3.2, M4.1, M5.1, M6.1, M6.2, M6.3, M6.4]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-M1.1–M5.1 complete. Wave 3 dispatching: M6.1–M6.4 (worktree isolation model).
+all 10 milestones complete (M1.1–M6.4). 3 workers, 3 waves, 0 failures, 0 git conflicts.
 
 ## Audit summary
 
