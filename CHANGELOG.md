@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `/multi-session:upgrade` command — diff live `.claude-multi-session/` against plugin source, apply updates with user confirmation (apply all / review each / cancel)
+- `/multi-session:dispatch` command — Reviewer dispatch helper with automatic file-region conflict detection, "don't touch" list auto-generation, first-dispatch heuristic, and pre-filled dispatch message output
+- `/multi-session:self-check` command — Worker pre-commit validation of auto-pass criteria (file scope, commit message format, PROGRESS.md checkbox, atomic log existence) with pre/post-commit auto-detection
+- `/multi-session:review` command — Reviewer review helper: reads git diff, compares per-criterion against acceptance criteria with evidence linking, generates review verdict message, optional `git merge --ff-only` on pass
+- `tests/validate-templates.sh` — template structure validation script (6 checks, 27 assertions): command frontmatter, init.md copy-list, WPF regression guard, role headings, message code blocks, log-template frontmatter
+- `.github/workflows/validate.yml` — CI workflow running template validation + root-vs-source drift guard on push to main and PRs
+
+### Changed
+
+- Synced root `.claude-multi-session/` templates to match v0.2.0 plugin source (10 files updated, resolving v0.1.0 drift)
+
 ## [0.2.0] - 2026-05-26
 
 ### Added
