@@ -183,7 +183,8 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **Recommendation**: 3 workers for Wave 1, 2 workers for Wave 2
 
 ### M6.1 — daily.md template: fix broken wikilink + stale PROGRESS.md section reference
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/daily.md`, `.claude-multi-session/log-templates/daily.md`
+- [x] <!-- SessionC --> 「註」Two fixes: (1) `[[progress-md-race-condition]]` → `[[progress-md-race]]` to match actual pitfall filename, (2) removed 「卡關紀錄」 from onboarding step 2 — PROGRESS.md has no such section; kept 「現在進度」+「設計決策變更紀錄」 which are the actual sections.
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/daily.md`, `.claude-multi-session/log-templates/daily.md`
 - **Acceptance**:
   - `[[progress-md-race-condition]]` replaced with `[[progress-md-race]]` (matching actual pitfall filename `docs/pitfalls/progress-md-race.md`)
   - Onboarding step referencing PROGRESS.md 「卡關紀錄」 removed or updated (PROGRESS.md has no such section; the actual section names are 「現在進度」「設計決策變更紀錄」)

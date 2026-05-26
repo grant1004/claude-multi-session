@@ -24,7 +24,7 @@ handoff-to: sessionN-next            # or "any-worker", or specific session id
 ## 🚀 接手 onboarding 流程 (in order)
 
 1. Read `CLAUDE.md` (architecture, commit rules, absolute prohibitions)
-2. Read `PROGRESS.md` 「現在進度」 + 「設計決策變更紀錄」 + 「卡關紀錄」
+2. Read `PROGRESS.md` 「現在進度」 + 「設計決策變更紀錄」
 3. Read **this file** §「絕對不能動」 + 「熱檔狀態」 + 「未完成 / 範圍外」
 4. Read task-relevant `docs/0X-*.md` architecture docs as needed
 5. Get a dispatch from Reviewer before writing any code
@@ -45,7 +45,7 @@ handoff-to: sessionN-next            # or "any-worker", or specific session id
 
 - Before editing `<hot file>`: `git log -p <file> | head -200` to see recent change context
 - Before adding a new helper module: check existing shared utilities for already-registered ones (don't duplicate)
-- Before editing `PROGRESS.md`: `git diff HEAD -- PROGRESS.md` to confirm no other session is mid-edit (race condition seen → [[progress-md-race-condition]])
+- Before editing `PROGRESS.md`: `git diff HEAD -- PROGRESS.md` to confirm no other session is mid-edit (race condition seen → [[progress-md-race]])
 
 (Project-specific. Add anything you learned the hard way this session.)
 
