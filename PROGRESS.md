@@ -142,7 +142,8 @@ Phase 2 audit complete — 5 milestones (M4.1–M5.2), codebase-memory MCP integ
 - **ROI**: medium — makes the tool priority visible at the workflow overview level so new sessions see it immediately
 
 ### M4.3 — dispatch.md (template): add codebase-memory to onboarding pre-block
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/dispatch.md`
+- [x] <!-- SessionC --> 「註」Added step 6 to first-dispatch onboarding pre-block: load codebase-memory tools via ToolSearch (get_architecture, search_graph, trace_path, search_code, get_code_snippet). Marked optional — Workers fall back to Glob/Grep/Read if unavailable. Kept tone consistent with existing steps (imperative, brief). Root copy byte-identical to plugin source.
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/dispatch.md`
 - **Acceptance**:
   - First-dispatch onboarding pre-block includes a new step (after existing step 5, before "Confirm via send_message"): load codebase-memory tools via ToolSearch — `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If unavailable, note and proceed with Glob/Grep/Read.
   - The step is numbered correctly (existing steps renumbered if needed)

@@ -15,6 +15,7 @@ Copy this block into `send_message` to a Worker when assigning a new milestone.
 3. Read .claude-multi-session/messages/completion-report.md (the format you'll send back)
 4. Read .claude-multi-session/log-templates/atomic.md and .claude-multi-session/log-templates/daily.md (the log artifacts you must produce)
 5. set_summary("Worker <your-id> — working on <project basename>")
+6. Load codebase-memory tools (optional but recommended): use `ToolSearch` to load `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If unavailable, proceed with Glob/Grep/Read — the tools are helpful but not required.
 
 Your worktree is at ../worker-<your-id>, branch session/<your-id>. All commits go to this branch — never commit directly to main.
 
