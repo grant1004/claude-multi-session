@@ -153,7 +153,7 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **ROI**: high — every new Worker gets codebase-memory awareness from their very first dispatch, not buried in worker.md prose
 
 ### M5.1 — dispatch command: use codebase-memory for dependency analysis
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
+- [x] <!-- sessionA --> 「註」Added codebase-memory two-tier integration: new step 2 (load tools via ToolSearch, flag availability), step 6a (trace_path for hidden dependency detection, advisory only), step 9a (search_graph to enrich technical hints). All steps 2-10 renumbered to 3-11. Frontmatter adds ToolSearch + 3 codebase-memory tools. All codebase-memory steps have silent fallback when unavailable. **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
 - **Acceptance**:
   - `allowed-tools` frontmatter adds ToolSearch and codebase-memory tools (get_architecture, search_graph, trace_path)
   - Step 5 (file-region conflict detection) has an optional sub-step: if codebase-memory available, use `trace_path` on expected files to detect hidden callers/dependencies not captured in PROGRESS.md file lists. Report as ⚠️ advisory (not blocking).

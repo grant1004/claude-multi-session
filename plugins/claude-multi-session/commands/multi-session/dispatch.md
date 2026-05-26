@@ -1,5 +1,5 @@
 ---
-allowed-tools: Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers
+allowed-tools: Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers, ToolSearch, mcp__codebase-memory-mcp__search_graph, mcp__codebase-memory-mcp__trace_path, mcp__codebase-memory-mcp__get_architecture
 description: Reviewer dispatch helper — generates a pre-filled dispatch message with automatic file-region conflict detection
 ---
 
@@ -20,7 +20,16 @@ You are the **Reviewer** preparing a dispatch message for a Worker. This command
 - If `PROGRESS.md` doesn't exist, tell the user to run `/multi-session:audit` first. Stop.
 - Read `PROGRESS.md` in full before proceeding.
 
-### 2. Parse PROGRESS.md
+### 2. Load codebase-memory tools (two-tier)
+
+Try to load codebase-memory tools via `ToolSearch`:
+- `mcp__codebase-memory-mcp__get_architecture`
+- `mcp__codebase-memory-mcp__search_graph`
+- `mcp__codebase-memory-mcp__trace_path`
+
+If ToolSearch returns the tools successfully, set `codebase_memory_available = true` for later steps. If ToolSearch returns nothing or the tools error on first use, set `codebase_memory_available = false` and proceed — all subsequent steps that use codebase-memory have fallback behavior.
+
+### 3. Parse PROGRESS.md
 
 Extract from **YAML frontmatter**:
 - `skipped:` — milestones excluded from dispatch
@@ -47,7 +56,7 @@ Build two lists:
 - If no dispatchable milestones remain, report "all milestones dispatched or completed" and stop.
 - If a dependency is unmet (e.g. M1.2 depends on M1.1 which is not yet completed), still show it as dispatchable but add a ⚠️ warning.
 
-### 3. Discover workers
+### 4. Discover workers
 
 Call `list_peers` (scope: `machine`). From the results:
 - Exclude yourself (peer ID `reviewer` or matching your own ID)
@@ -55,7 +64,7 @@ Call `list_peers` (scope: `machine`). From the results:
 
 If 0 peers found: tell the user no workers are visible. Suggest they launch workers with `claude-peers -id sessionA` etc. Stop.
 
-### 4. Reviewer chooses milestone + worker
+### 5. Reviewer chooses milestone + worker
 
 Use `AskUserQuestion` with **2 questions in a single call**:
 
@@ -73,7 +82,7 @@ Use `AskUserQuestion` with **2 questions in a single call**:
 - Each option label: peer ID (e.g. `sessionA`)
 - Each option description: current summary text from `list_peers`
 
-### 5. File-region conflict detection
+### 6. File-region conflict detection
 
 Compare the chosen milestone's expected files against **all in-flight milestones'** file sets:
 
@@ -84,9 +93,27 @@ Compare the chosen milestone's expected files against **all in-flight milestones
     Mx.y expects: <file>
     My.z (in-flight, sessionN) holds: <same file>
   ```
-  Then ask via `AskUserQuestion`: "Proceed despite overlap? The generated dispatch will include a warning." Options: "Yes, proceed" / "No, pick a different milestone" (if "No", loop back to step 4).
+  Then ask via `AskUserQuestion`: "Proceed despite overlap? The generated dispatch will include a warning." Options: "Yes, proceed" / "No, pick a different milestone" (if "No", loop back to step 5).
 
-### 6. Build the "don't touch" list
+#### 6a. Hidden dependency detection (codebase-memory, optional)
+
+If `codebase_memory_available`:
+
+For each file in the milestone's expected files list, call `trace_path(function_name=<file>, mode="calls")` to discover callers and importers outside the milestone's scope. Compare these against in-flight milestones' file sets.
+
+If hidden dependencies are found (a file not in the milestone's expected list imports or calls into a file that IS in scope, and that external file is held by another in-flight milestone):
+
+```
+⚠️ Hidden dependency detected (via codebase-memory):
+  <external_file> (held by My.z, sessionN) imports/calls into <scoped_file> (Mx.y scope)
+  This won't cause a git conflict, but changes to <scoped_file> may affect <external_file>'s behavior.
+```
+
+Report as **advisory only** (⚠️, not blocking). The Reviewer decides whether to adjust scope or proceed.
+
+If `codebase_memory_available = false`: skip this sub-step silently. The explicit file-region check in step 6 still runs.
+
+### 7. Build the "don't touch" list
 
 Aggregate expected files from **all in-flight milestones** (those in `in_progress:`). Group by session if the `<!-- sessionId -->` comment is present in PROGRESS.md:
 
@@ -105,7 +132,7 @@ If no milestones are in-flight, the "don't touch" section should say:
 
 Additionally, scan the dispatch hints for this milestone in PROGRESS.md — if the `## Parallelism analysis` section mentions specific files to avoid, include those too.
 
-### 7. Detect first-dispatch + worktree info
+### 8. Detect first-dispatch + worktree info
 
 **First-dispatch detection** — a worker needs the onboarding pre-block on their first dispatch in a session. Heuristics:
 - Worker's summary contains "awaiting dispatch" or "standing by" → likely first dispatch
@@ -125,9 +152,27 @@ If the worktree for this worker is not visible in `git worktree list`, note this
   git worktree add ../worker-<sessionId> -b session/<sessionId>
 ```
 
-### 8. Generate the dispatch message
+### 9. Generate the dispatch message
 
 Build a complete dispatch message following the format in `.claude-multi-session/messages/dispatch.md`. Output it as a **fenced code block** the Reviewer can copy.
+
+#### 9a. Enrich technical hints with codebase-memory (optional)
+
+If `codebase_memory_available`:
+
+Before generating the `🎯 技術建議 / Hints` section, call `search_graph` on the milestone's expected files to discover:
+- What modules/functions each file imports or exports
+- Known callers of functions defined in the expected files
+- Architectural role of the file (e.g. "this is a command file", "this is a template consumed by init.md")
+
+Weave these findings into the hints section as concrete, actionable context — e.g.:
+- "This file imports `X` from `Y` — read `Y` first for context"
+- "`functionZ` in this file is called by `A`, `B`, `C` — changes may affect those callers"
+- "This module sits in the `commands/` layer — it should only use tools listed in its `allowed-tools` frontmatter"
+
+If `codebase_memory_available = false`: generate hints from PROGRESS.md content only (existing behavior). The hints section still exists — it just won't have graph-derived context.
+
+#### 9b. Message structure
 
 **Structure of the generated message:**
 
@@ -160,10 +205,10 @@ Then the dispatch block:
   - <file 2>
 
 🎯 技術建議 / Hints:
-- <from PROGRESS.md hints or Reviewer's knowledge — leave placeholder if none>
+- <from PROGRESS.md hints, Reviewer's knowledge, and codebase-memory graph context (if available)>
 
 ⚠️ 不要動 (don't touch):
-- <auto-generated from step 6>
+- <auto-generated from step 7>
 
 🔒 規則提醒 (rules — non-negotiable):
 1. Only do Mx.y; stop and report when done. No scope creep.
@@ -183,7 +228,7 @@ Then the dispatch block:
 - **Rule 2 (build)**: adapt to the project. If `package.json` exists, use `npm run build` or `npm test`. If no build step (pure markdown projects), say "No build step — but verify <appropriate check>". Read from PROGRESS.md audit summary or `CLAUDE.md` for the project's build command.
 - **Auto-pass criteria**: include for 🤖-marked milestones only. Omit the section entirely for ✍️ milestones.
 
-### 9. Suggest in_progress update
+### 10. Suggest in_progress update
 
 After outputting the dispatch message, remind the Reviewer:
 
@@ -194,7 +239,7 @@ After outputting the dispatch message, remind the Reviewer:
 
 This ensures subsequent `/multi-session:dispatch` calls detect the correct held file regions.
 
-### 10. Stop
+### 11. Stop
 
 After outputting the dispatch message and the reminder, stop. Do not:
 - Send the message yourself
