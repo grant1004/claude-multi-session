@@ -251,7 +251,8 @@ All 17 milestones complete (M1.1–M6.5). Phase 1–3, 3 workers, 7 waves, 0 fai
 - **ROI**: medium — QUICKSTART is the onboarding entry point; duplicate text and missing command reference confuse new users
 
 ### M7.2 — dispatch template: sync rule 7 (rebase) from command
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/dispatch.md`
+- [x] <!-- sessionB --> 「註」Added rule 7 (`git rebase main` before committing) to template rules section. Updated header from "all six required" to "all seven required". Root copy byte-identical to plugin source.
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/dispatch.md`
 - **Acceptance**:
   - Template rules section has 7 rules matching the dispatch command's 7 rules (rule 7 = rebase main before committing)
   - Header updated from "all six required" to "all seven required"
