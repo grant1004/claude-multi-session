@@ -1,14 +1,14 @@
 ---
 skipped: []
-in_progress: [M4.1, M4.2, M4.3]
-completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3]
+in_progress: [M5.1, M5.2]
+completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-Phase 2 audit complete — 5 milestones (M4.1–M5.2), codebase-memory MCP integration across workflow. Awaiting dispatch.
+Phase 2 Wave 1 complete (M4.1–M4.3). Wave 2 dispatching (M5.1, M5.2).
 
 ## Audit summary
 
