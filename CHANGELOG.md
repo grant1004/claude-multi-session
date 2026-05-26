@@ -18,9 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- codebase-memory MCP integrated across all workflow phases: `worker.md` setup + responsibilities (two-tier: try → fallback), `workflow.md` roles table with "Code exploration" column + tooling note, `dispatch.md` template onboarding step 6, dispatch command (hidden dependency detection via `trace_path`, enriched hints via `search_graph`), review command (impact radius analysis via `trace_path`, criterion evaluation via `get_code_snippet`)
 - `reviewer.md` setup flow now branches on project state: no PROGRESS.md → audit, uncompleted milestones → resume, all completed → ask user for next phase or close out. Also distinguishes new vs returning Workers in onboarding step.
 - Added daily summary enforcement gate: Reviewer must verify `session-N.md` exists before worktree cleanup. `workflow.md` state machine now has `[Verify logs]` step between `[Wrap up]` and `[Cleanup]`. `completion-report.md` includes daily summary status field. `worker.md` marks daily summary as ENFORCED with warning that Reviewer blocks cleanup.
 - Synced root `.claude-multi-session/` templates to match v0.2.0 plugin source (10 files updated, resolving v0.1.0 drift)
+
+### Fixed
+
+- dispatch command now generates messages matching `dispatch.md` template: rule 6 (acceptance criteria tests), onboarding step 6 (codebase-memory), auto-pass criteria section for 🤖-marked milestones
+- review command post-review actions aligned with `review-pass.md` template order (5 steps, added "dispatch next" step)
+- `roll-call.md` stale claim that no dispatch command exists — rewritten to reference `/multi-session:dispatch`
+- `daily.md` broken wikilink `[[progress-md-race-condition]]` → `[[progress-md-race]]`; removed reference to nonexistent PROGRESS.md "卡關紀錄" section
+- `README.md` scripts path corrected; `CHANGELOG.md` QUICKSTART step count corrected
 
 ## [0.2.0] - 2026-05-26
 

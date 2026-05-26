@@ -1,14 +1,14 @@
 ---
 skipped: []
-in_progress: [M6.1, M6.2, M6.5]
-completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2]
+in_progress: []
+completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatching (M6.1, M6.2, M6.5).
+All 17 milestones complete (M1.1–M6.5). Phase 1–3, 3 workers, 7 waves, 0 failures, 0 git conflicts.
 
 ## Audit summary
 
@@ -23,9 +23,9 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
   - `plugins/.../templates/.claude-multi-session/workflow.md` (2 commits)
 - **現狀**:
   - **Done**: Plugin scaffolding (9 commands), all role/message/log templates, cross-platform launchers, worktree isolation model, ADR-001 in audit.md, QUICKSTART, README, CHANGELOG, root template sync (M1.1), upgrade command (M1.2), validation script + CI (M2.1/M2.2), dispatch/self-check/review helper commands (M3.1-M3.3), codebase-memory integration in templates (M4.1-M4.3)
-  - **In progress**: codebase-memory in dispatch + review commands (M5.1-M5.2)
-  - **Known gaps**: Documentation cross-consistency issues (dispatch command/template rule mismatch, roll-call.md stale claims, daily.md broken wikilink) — tracked as Phase 3 milestones (M6.x)
-- **已知限制**: Documentation accumulated drift from rapid multi-phase development. Phase 3 addresses cross-file consistency.
+  - **In progress**: (none)
+  - **Known gaps**: (none — Phase 3 resolved all cross-audit findings)
+- **已知限制**: None active. SessionA's daily summary notes validation script doesn't check command output vs template format — potential future improvement.
 - **Recommended worker count**: 3 (see parallelism analysis below)
 
 ## Milestones
