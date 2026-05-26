@@ -8,7 +8,7 @@ completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3]
 
 ## 現在進度
 
-all 7 milestones complete (M1.1–M3.3). 3 workers, 3 waves, 0 failures, 0 git conflicts.
+Phase 2 audit complete — 5 milestones (M4.1–M5.2), codebase-memory MCP integration across workflow. Awaiting dispatch.
 
 ## Audit summary
 
@@ -122,10 +122,67 @@ all 7 milestones complete (M1.1–M3.3). 3 workers, 3 waves, 0 failures, 0 git c
   - **Wave 3**: M3.3 (1 worker; or fold into Wave 2 if a worker finishes early)
 - **Recommendation**: spin up 3 workers (`claude-peers -id sessionA / sessionB / sessionC`)
 
+### M4.1 — worker.md: add codebase-memory code exploration protocol
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`, `.claude-multi-session/roles/worker.md`
+- **Acceptance**:
+  - worker.md has a new responsibility item describing two-tier codebase-memory usage (try via ToolSearch → fallback to Glob/Grep/Read). NOT three-tier — Workers don't ask user to install, they just fallback silently.
+  - Setup section includes a step to load codebase-memory tools via ToolSearch (after reading role files, before waiting for dispatch)
+  - "Common mistakes" section includes an entry about using Glob/Grep/Read without first trying codebase-memory
+  - Root copy `.claude-multi-session/roles/worker.md` is byte-identical to plugin source (`diff` returns 0)
+- **Effort**: S
+- **ROI**: high — Workers are the primary code readers; codebase-memory gives them architectural context instead of blind file-by-file grep
+
+### M4.2 — workflow.md: add codebase-memory to roles table and tooling note
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `.claude-multi-session/workflow.md`
+- **Acceptance**:
+  - "Roles at a glance" table has a new column "Code exploration" showing tool priority per role (Worker: codebase-memory → Glob/Grep/Read, Reviewer: codebase-memory → git diff, PM: N/A)
+  - A short paragraph (not a new section) after the table explains the codebase-memory try→fallback pattern and links to audit.md §4a for the full three-tier logic
+  - Root copy `.claude-multi-session/workflow.md` is byte-identical to plugin source
+- **Effort**: S
+- **ROI**: medium — makes the tool priority visible at the workflow overview level so new sessions see it immediately
+
+### M4.3 — dispatch.md (template): add codebase-memory to onboarding pre-block
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/dispatch.md`
+- **Acceptance**:
+  - First-dispatch onboarding pre-block includes a new step (after existing step 5, before "Confirm via send_message"): load codebase-memory tools via ToolSearch — `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If unavailable, note and proceed with Glob/Grep/Read.
+  - The step is numbered correctly (existing steps renumbered if needed)
+  - Root copy `.claude-multi-session/messages/dispatch.md` is byte-identical to plugin source
+- **Effort**: S
+- **ROI**: high — every new Worker gets codebase-memory awareness from their very first dispatch, not buried in worker.md prose
+
+### M5.1 — dispatch command: use codebase-memory for dependency analysis
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
+- **Acceptance**:
+  - `allowed-tools` frontmatter adds ToolSearch and codebase-memory tools (get_architecture, search_graph, trace_path)
+  - Step 5 (file-region conflict detection) has an optional sub-step: if codebase-memory available, use `trace_path` on expected files to detect hidden callers/dependencies not captured in PROGRESS.md file lists. Report as ⚠️ advisory (not blocking).
+  - Step 8 (generate dispatch message) uses `search_graph` results (if available) to populate better 🎯 technical hints — e.g. "this file imports X, Y is a caller"
+  - Two-tier: try codebase-memory, fallback to existing behavior. Command must still work fully without codebase-memory.
+- **Effort**: M
+- **ROI**: high — hidden file dependencies are the #1 cause of cross-Worker conflicts that file-region partitioning misses
+
+### M5.2 — review command: use codebase-memory for impact analysis
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
+- **Acceptance**:
+  - `allowed-tools` frontmatter adds ToolSearch and codebase-memory tools (trace_path, search_graph, get_code_snippet)
+  - Step 4 (read the diff) has an optional sub-step: if codebase-memory available, use `trace_path` on changed functions/classes to identify callers outside the milestone scope. Report as "impact radius" advisory in the review output.
+  - Step 5 (compare acceptance criteria) can use `get_code_snippet` to read relevant source (not just diff) for more accurate criterion evaluation
+  - Two-tier: try codebase-memory, fallback to existing git-diff-only behavior. Command must still work fully without codebase-memory.
+- **Effort**: M
+- **ROI**: medium — improves review quality by catching unintended side-effects, but Reviewer already reads full diffs manually
+
+## Phase 2 parallelism analysis
+
+- Max independent file-region set: **5** — all milestones touch entirely separate files
+- Sequencing constraints: none — all M4.x and M5.x are independent
+- Wave plan (3 workers):
+  - **Wave 1**: M4.1 + M4.2 + M4.3 (3 workers, 3 template files, all S effort)
+  - **Wave 2**: M5.1 + M5.2 (2 workers, 2 command files, M effort; 1 worker idle or dismissed)
+- **Recommendation**: 3 workers for Wave 1, 2 workers for Wave 2
+
 ## 待用戶決定 / Pending user decision
 
 (None.)
 
 ## 設計決策變更紀錄 / Decision changelog
 
-(Empty at audit time.)
+- 2026-05-27: Phase 2 milestones added — codebase-memory integration across workflow (M4.1–M5.2). Driven by ADR-001 §3 gap: codebase-memory was only in audit.md, not in Worker/Reviewer daily workflow.
