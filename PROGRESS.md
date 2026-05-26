@@ -123,7 +123,7 @@ Phase 2 audit complete — 5 milestones (M4.1–M5.2), codebase-memory MCP integ
 - **Recommendation**: spin up 3 workers (`claude-peers -id sessionA / sessionB / sessionC`)
 
 ### M4.1 — worker.md: add codebase-memory code exploration protocol
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`, `.claude-multi-session/roles/worker.md`
+- [x] <!-- sessionA --> 「註」Added two-tier codebase-memory protocol: Setup step 3 loads tools via ToolSearch (silent fallback if unavailable), new responsibility item describes five core tools + fallback logic, new "Common mistakes" entry. Root copy byte-identical to plugin source. **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`, `.claude-multi-session/roles/worker.md`
 - **Acceptance**:
   - worker.md has a new responsibility item describing two-tier codebase-memory usage (try via ToolSearch → fallback to Glob/Grep/Read). NOT three-tier — Workers don't ask user to install, they just fallback silently.
   - Setup section includes a step to load codebase-memory tools via ToolSearch (after reading role files, before waiting for dispatch)

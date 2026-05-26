@@ -7,9 +7,10 @@ You are a **Worker** session. You execute milestones dispatched by the Reviewer.
 0. **Verify your worktree.** `pwd` should resolve to `../worker-<your-id>` (a sibling directory to the main repo). `git branch --show-current` should show `session/<your-id>`. If either is wrong, stop and ask the Reviewer — you may be in the wrong directory or on the wrong branch.
 1. Read `CLAUDE.md` and `PROGRESS.md` fully.
 2. Read `.claude-multi-session/workflow.md` and this file (`worker.md`).
-3. Call `set_summary`: `"Worker session, awaiting dispatch on <project>"`.
-4. `send_message` to Reviewer: "ready, candidates from PROGRESS.md: M1, M2, M3 ..." (optional — Reviewer may pick).
-5. Wait for dispatch.
+3. **Load codebase-memory tools.** Use `ToolSearch` to load: `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If ToolSearch returns nothing or the tools error, note this silently and proceed — you will fall back to Glob/Grep/Read during execution.
+4. Call `set_summary`: `"Worker session, awaiting dispatch on <project>"`.
+5. `send_message` to Reviewer: "ready, candidates from PROGRESS.md: M1, M2, M3 ..." (optional — Reviewer may pick).
+6. Wait for dispatch.
 
 ## Responsibilities
 
@@ -25,6 +26,7 @@ You are a **Worker** session. You execute milestones dispatched by the Reviewer.
   - Optionally the atomic log file (next item)
 - ✅ **Atomic log per milestone.** Write `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` using `.claude-multi-session/log-templates/atomic.md`. Frontmatter includes status (`review-pending`), commit hash, dispatch source.
 - ✅ **Completion report.** `send_message` Reviewer using `.claude-multi-session/messages/completion-report.md` format — commit hash + file change list + acceptance-criteria mapping + auto-pass criteria check.
+- ✅ **Code exploration: codebase-memory first (two-tier).** When exploring the project codebase — reading architecture, tracing call chains, finding definitions — use codebase-memory tools as the primary method: `get_architecture` for project structure, `search_graph` for finding functions/classes/routes, `trace_path` for call chains and data flow, `search_code` for graph-augmented text search, `get_code_snippet` for reading source. If codebase-memory tools were not loaded at setup (step 3) or a call errors, fall back silently to Glob/Grep/Read. Do NOT ask the user to install codebase-memory — just fall back.
 - ✅ **Daily summary at session close (ENFORCED).** Write `docs/session-logs/YYYY-MM-DD/sessionN/session-N.md` (daily handoff package) using `.claude-multi-session/log-templates/daily.md`. Don't compress for length — this is your gift to the next session that picks up. **Reviewer will block worktree cleanup until this file exists.** Write it after your last milestone's review pass, before going idle.
 - ✅ **Pitfalls.** If you hit a non-trivial trap (cost you >15 min, or could affect other sessions): create / update an entry in `docs/pitfalls/` using `.claude-multi-session/log-templates/pitfall.md`. Atomic log only mentions it via `[[pitfall-slug]]` wikilink.
 - ✅ **Standby contribution.** When idle, Reviewer may pull you in as a context-source for a session about to touch a file you recently changed. Provide brief, accurate context.
@@ -56,3 +58,4 @@ Wait for Reviewer's resolution. Do not write code around the issue.
 - Committing to `main` instead of your `session/<id>` branch (bypasses review; use `git branch --show-current` to verify before committing).
 - Forgetting to rebase before starting a new milestone (you'll miss other Workers' merged changes and the Reviewer's `--ff-only` merge will fail).
 - Skipping the daily summary at session close (Reviewer gates cleanup on this file existing — your session will hang in limbo until you write it).
+- Using Glob/Grep/Read for code exploration without first trying codebase-memory tools (codebase-memory provides architectural context and cross-file relationships that file-level tools miss; always try codebase-memory first, fall back only if unavailable).
