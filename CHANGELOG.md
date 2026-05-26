@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `roll-call.md` stale claim that no dispatch command exists — rewritten to reference `/multi-session:dispatch`
 - `daily.md` broken wikilink `[[progress-md-race-condition]]` → `[[progress-md-race]]`; removed reference to nonexistent PROGRESS.md "卡關紀錄" section
 - `README.md` scripts path corrected; `CHANGELOG.md` QUICKSTART step count corrected
+- `QUICKSTART.md` §7c duplicate "From there the Reviewer drives" paragraph merged; added `/multi-session:dispatch` mention
+- `dispatch.md` template synced rule 7 (rebase main) from dispatch command; header updated "all six" → "all seven required"
 
 ## [0.2.0] - 2026-05-26
 

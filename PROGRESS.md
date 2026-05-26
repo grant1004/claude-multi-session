@@ -1,14 +1,14 @@
 ---
 skipped: []
-in_progress: [M7.1, M7.2]
-completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5]
+in_progress: []
+completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5, M7.1, M7.2]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-All 17 milestones complete (M1.1–M6.5). Phase 1–3, 3 workers, 7 waves, 0 failures, 0 git conflicts.
+All 19 milestones complete (M1.1–M7.2). Phase 1–4, 3 workers, 9 waves, 0 failures, 0 git conflicts.
 
 ## Audit summary
 
