@@ -192,7 +192,7 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **ROI**: medium — broken wikilinks break Obsidian navigation for future sessions reading handoff packages
 
 ### M6.2 — roll-call.md: remove stale "no dispatch command" claim
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/roll-call.md`
+- [x] <!-- sessionA --> 「註」Rewrote §6 paragraph to acknowledge `/multi-session:dispatch` exists. Changed from "intentionally manual (no command)" to "assisted via /multi-session:dispatch, Reviewer reviews before sending". One sentence replacement, no other changes. **Expected files**: `plugins/claude-multi-session/commands/multi-session/roll-call.md`
 - **Acceptance**:
   - The paragraph claiming dispatch is "intentionally manual (no /multi-session:dispatch slash command)" is removed or rewritten to acknowledge the command exists
   - No other functional changes to roll-call.md behavior
