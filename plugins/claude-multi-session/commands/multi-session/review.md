@@ -1,5 +1,5 @@
 ---
-allowed-tools: Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers
+allowed-tools: Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers, ToolSearch, mcp__codebase-memory-mcp__trace_path, mcp__codebase-memory-mcp__search_graph, mcp__codebase-memory-mcp__get_code_snippet
 description: Reviewer review helper — reads git diff, compares against acceptance criteria, generates review verdict message, optionally merges on pass
 ---
 
@@ -21,7 +21,14 @@ You are the **Reviewer** conducting a structured review of a Worker's completed 
 - If `PROGRESS.md` doesn't exist, tell the user to run `/multi-session:audit` first. Stop.
 - Read `PROGRESS.md` in full before proceeding.
 
-### 2. Select milestone and worker branch
+### 2. Load codebase-memory tools (optional)
+
+Try to load codebase-memory tools via `ToolSearch` (query: `select:mcp__codebase-memory-mcp__trace_path,mcp__codebase-memory-mcp__search_graph,mcp__codebase-memory-mcp__get_code_snippet`).
+
+- **Available**: note this for steps 5 and 6 — you can use `trace_path` for impact analysis and `get_code_snippet` for deeper criterion checks.
+- **Unavailable** (ToolSearch returns nothing or calls error): proceed without it. All subsequent steps work fully with git-diff-only. Do not ask the user to install — just fall back silently.
+
+### 3. Select milestone and worker branch
 
 Check if the user provided arguments (milestone ID and/or branch). If not, use `AskUserQuestion` to select:
 
@@ -39,7 +46,7 @@ Check if the user provided arguments (milestone ID and/or branch). If not, use `
 
 If only one session branch has commits ahead of main, auto-select it and skip the question.
 
-### 3. Read acceptance criteria
+### 4. Read acceptance criteria
 
 From PROGRESS.md, extract the selected milestone's `**Acceptance**:` section. Parse each bullet as an individual criterion.
 
@@ -47,7 +54,7 @@ Also extract:
 - `**Expected files**:` — the files the milestone was supposed to touch
 - The `「註」` content if the checkbox is `[x]` (Worker's implementation notes)
 
-### 4. Read the diff
+### 5. Read the diff
 
 Run these commands and capture output:
 
@@ -62,11 +69,24 @@ Also check:
 - **PROGRESS.md updated**: verify the diff includes a change to the milestone's checkbox line.
 - **Atomic log present**: check if `docs/session-logs/*/session*/Mx.y-session*.md` exists in the diff.
 
-### 5. Compare against acceptance criteria
+**Impact analysis (if codebase-memory available from step 2):**
+
+Use `trace_path` on key functions/classes changed in the diff (extract names from `git diff --name-only` + diff hunks) to identify callers or dependents **outside** the milestone's expected file scope. Report results as an advisory block:
+
+```
+🔬 Impact radius (codebase-memory):
+- `functionX` (changed in file.md) → called by: <caller list or "no external callers">
+- `classY` (changed in other.md) → referenced by: <reference list>
+⚠️ Potential cross-scope impact: <summary, or "none detected">
+```
+
+This is advisory — it informs the Reviewer's judgment but does not auto-fail the review. If codebase-memory is unavailable, skip this block entirely.
+
+### 6. Compare against acceptance criteria
 
 For each acceptance criterion bullet:
 1. Read the criterion text
-2. Look for evidence in the diff that it's satisfied
+2. Look for evidence in the diff that it's satisfied. If codebase-memory is available (step 2), use `get_code_snippet` to read surrounding source context when the diff alone doesn't show enough to judge a criterion — e.g. verifying a function signature matches a spec, or confirming an import was added correctly.
 3. Assign a verdict: **met** / **partial** / **not met**
 
 Present the results in a structured block:
@@ -93,7 +113,7 @@ Also run the rule compliance checks:
 - Branch is session/<id> (not main): ✅ / ❌
 ```
 
-### 6. Recommend verdict
+### 7. Recommend verdict
 
 Based on the acceptance criteria results:
 - **All met + all rules pass** → recommend PASS
@@ -104,7 +124,7 @@ Use `AskUserQuestion`:
 - "Review verdict for Mx.y?"
 - Options: "Pass" (with summary of what's good) / "Fail" (with summary of issues) / "Hold" (with option to explain reason)
 
-### 7. Generate verdict message
+### 8. Generate verdict message
 
 Based on the Reviewer's choice, generate the message using `.claude-multi-session/messages/review-pass.md` format.
 
@@ -145,7 +165,7 @@ Standby for now; I'll dispatch again when blocker clears.
 
 Output the message as a **fenced code block** the Reviewer can copy into `send_message`.
 
-### 8. Offer merge (pass only)
+### 9. Offer merge (pass only)
 
 If verdict is PASS, ask the Reviewer:
 
@@ -170,7 +190,7 @@ After merge (or skip), remind:
 4. Update Worker's atomic log status: review-pending → review-pass
 ```
 
-### 9. Stop
+### 10. Stop
 
 After outputting the verdict message and post-review reminders, stop. Do not:
 - Send the message yourself (Reviewer sends manually)

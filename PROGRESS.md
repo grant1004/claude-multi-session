@@ -163,7 +163,8 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **ROI**: high — hidden file dependencies are the #1 cause of cross-Worker conflicts that file-region partitioning misses
 
 ### M5.2 — review command: use codebase-memory for impact analysis
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
+- [x] <!-- sessionB --> 「註」Added step 2 (load codebase-memory via ToolSearch, silent fallback). Step 5 (was 4): added impact analysis sub-block using `trace_path` on changed functions, advisory-only. Step 6 (was 5): `get_code_snippet` for deeper criterion evaluation. Steps renumbered 1–10 (was 1–9). `allowed-tools` adds ToolSearch + 3 codebase-memory tools. Two-tier: all steps work fully without codebase-memory.
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
 - **Acceptance**:
   - `allowed-tools` frontmatter adds ToolSearch and codebase-memory tools (trace_path, search_graph, get_code_snippet)
   - Step 4 (read the diff) has an optional sub-step: if codebase-memory available, use `trace_path` on changed functions/classes to identify callers outside the milestone scope. Report as "impact radius" advisory in the review output.
