@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial plugin scaffolding: manifest, MIT license, README, `/multi-session:init` command
 - Role definitions (Reviewer, Worker, Project Manager), message templates (dispatch, completion-report, review-pass), log templates (atomic, daily, reviewer-master, pitfall), and workflow state machine
-- QUICKSTART.md — zero-baseline Windows setup guide (steps 1-8)
+- QUICKSTART.md — zero-baseline Windows setup guide (steps 1-9)
 - `claude-peers.ps1` PowerShell launcher script with `-id` flag and env var passthrough
 - `.claude-plugin/marketplace.json` for `/plugin marketplace add` resolution
 - `/multi-session:audit` and `/multi-session:roll-call` slash commands

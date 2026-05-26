@@ -221,7 +221,8 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **Dependency**: M5.2 must be merged first (SessionB is currently editing this file)
 
 ### M6.5 — README.md + CHANGELOG.md: fix minor reference errors
-- [ ] **Expected files**: `README.md`, `CHANGELOG.md`
+- [x] <!-- sessionB --> 「註」README.md: `scripts/` → `plugins/claude-multi-session/scripts/`. CHANGELOG.md: "steps 1-8" → "steps 1-9" (QUICKSTART has §1–§9). Both verified against actual file structure.
+- **Expected files**: `README.md`, `CHANGELOG.md`
 - **Acceptance**:
   - README.md `scripts/` reference corrected to `plugins/claude-multi-session/scripts/` or made unambiguous
   - CHANGELOG.md "steps 1-8" corrected to match actual QUICKSTART.md section count

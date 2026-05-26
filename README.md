@@ -69,7 +69,7 @@ This plugin codifies a workflow that has been battle-tested on a real WPF projec
 
 ## Launcher
 
-Two launcher scripts are provided in `scripts/` — they do the same thing (set `CLAUDE_PEERS_PEER_ID`, launch `claude` with the right flags, pass extra args through):
+Two launcher scripts are provided in `plugins/claude-multi-session/scripts/` — they do the same thing (set `CLAUDE_PEERS_PEER_ID`, launch `claude` with the right flags, pass extra args through):
 
 | Script | Platform | Install |
 |---|---|---|
