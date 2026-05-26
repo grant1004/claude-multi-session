@@ -201,7 +201,7 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **ROI**: medium — stale claim directly contradicts M3.1's work; confuses Reviewers reading the command
 
 ### M6.3 — dispatch command: align rules + onboarding with template
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
+- [x] <!-- sessionA --> 「註」Three fixes: (1) onboarding pre-block now has step 6 (codebase-memory, matching template), (2) rules section now has 7 rules — original rule 6 (rebase) moved to rule 7, new rule 6 matches template's acceptance criteria test rule, header says "all seven required", added enforcement note, (3) auto-pass criteria section added to generated dispatch block (🤖-marked only). Adaptive fields updated for rule 6 + auto-pass. **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
 - **Acceptance**:
   - Generated dispatch message's rule 6 matches template's rule 6 (acceptance criteria with executable tests → must pass before commit)
   - Generated onboarding pre-block includes all steps from template (including step 6 codebase-memory, matching template's `messages/dispatch.md`)
