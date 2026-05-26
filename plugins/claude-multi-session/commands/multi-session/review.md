@@ -183,11 +183,12 @@ If `--ff-only` fails, report the error and suggest the Worker rebase: "Ask the W
 After merge (or skip), remind:
 
 ```
-📝 Post-review actions:
+📝 Post-review actions (in order):
 1. send_message the verdict to the Worker (copy the block above)
-2. Update PROGRESS.md frontmatter: move Mx.y from in_progress to completed
-3. Update docs/review-logs/<today>.md with review entry
-4. Update Worker's atomic log status: review-pending → review-pass
+2. Update docs/review-logs/<today>.md: add row to "Review pass 一覽" table + add Mx.y-sessionN heading section
+3. Update Worker's atomic log status: review-pending → review-pass
+4. Update PROGRESS.md: move Mx.y from in_progress to completed, update 「現在進度」 line
+5. Dispatch next milestone to the Worker (use /multi-session:dispatch), or send "Standby"
 ```
 
 ### 10. Stop

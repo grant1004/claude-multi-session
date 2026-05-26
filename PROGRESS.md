@@ -212,7 +212,8 @@ Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatchi
 - **Dependency**: M5.1 must be merged first (SessionA is currently editing this file)
 
 ### M6.4 — review command: align post-review steps with template
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
+- [x] <!-- sessionB --> 「註」Reordered post-review actions to match review-pass.md template: merge (already step 9) → send verdict → review-logs → atomic log status → PROGRESS.md → dispatch next. Added missing step 5 (dispatch next / standby). Expanded review-logs step with table+heading detail from template. 5 steps now (was 4).
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
 - **Acceptance**:
   - Post-review actions list matches review-pass.md template's "After-pass actions": merge → update review-logs → update atomic log status → update PROGRESS.md → dispatch next (or standby)
   - "send_message the verdict" step is included (command-specific, not in template — that's fine, but ordering should be explicit: send verdict THEN do post-review housekeeping)
