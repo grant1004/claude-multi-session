@@ -2,7 +2,7 @@
 title: SessionA — 2026-05-27 work summary
 session: SessionA
 date: 2026-05-27
-milestones: [M4.1, M5.1, M6.2, M6.3]
+milestones: [M4.1, M5.1, M6.2, M6.3, M7.1]
 status: closed
 handoff-to: any-worker
 ---
@@ -26,6 +26,7 @@ handoff-to: any-worker
 - [[M5.1-SessionA]] — dispatch command: use codebase-memory for dependency analysis (`34c92f5`)
 - [[M6.2-SessionA]] — roll-call.md: remove stale "no dispatch command" claim (`d475843`)
 - [[M6.3-SessionA]] — dispatch command: align rules + onboarding with template (`c8407d2`)
+- [[M7.1-SessionA]] — QUICKSTART.md §7c: fix duplicate paragraph + mention dispatch command (`0d1230c`)
 
 ## ⛔ 絕對不能動 / Absolute don't-touch (discovered this session)
 
@@ -57,6 +58,10 @@ handoff-to: any-worker
 ### `plugins/claude-multi-session/commands/multi-session/roll-call.md`
 - **State now:** §6 rewritten in M6.2 to acknowledge `/multi-session:dispatch` exists. One paragraph changed, no structural changes.
 
+### `QUICKSTART.md`
+- **State now:** §7c updated in M7.1 — duplicate "From there the Reviewer drives" paragraphs merged into one; dispatch flow now mentions `/multi-session:dispatch` for auto-generating dispatch messages instead of "dispatch each manually via send_message".
+- **Pattern note:** QUICKSTART references several slash commands by name. If commands are renamed or removed, QUICKSTART must be updated too.
+
 ## 🌊 工作流程觀察 / Workflow observations (cross-milestone)
 
 1. **Template-command drift is the biggest doc consistency risk.** Three of my four milestones involved aligning command output with template format. The dispatch command had drifted in rules, onboarding steps, and auto-pass section. Future: consider a lint check that compares command-generated blocks against template structure (beyond the existing `diff -r` for template files).
@@ -67,9 +72,10 @@ handoff-to: any-worker
 
 4. **Atomic log commit-hash TBD → amend pattern is unavoidable** but adds a predictable overhead. The hash can't be known before the commit, so the amend is structurally necessary. Not a pitfall, just a workflow tax.
 
+5. **Session re-dispatch works smoothly.** After first session close (M4.1–M6.3), Reviewer re-created the worktree and dispatched M7.1. The daily summary update (append, not rewrite) pattern works — future sessions inheriting this Worker's worktree get the full picture.
+
 ## 🚫 未完成 / 範圍外 / Out of scope
 
-- **M6.4 (review command alignment)**: SessionB's scope — aligns `review.md` command with `review-pass.md` template, same pattern as my M6.3.
-- **M6.5 (README + CHANGELOG fixes)**: SessionC's scope — path corrections and step count updates.
-- **Validation script update**: `tests/validate-templates.sh` was not in scope for any Phase 2/3 milestone. The script validates template structure (headings, frontmatter) but does NOT validate command-generated output against template format. This gap is the root cause of the drift that M6.3/M6.4 fixed. Worth a future milestone if drift recurs.
+- **M6.4, M6.5, M7.2**: Completed by other sessions (SessionB, SessionC). M6.4 aligned review command, M6.5 fixed README/CHANGELOG, M7.2 synced dispatch template rule 7 (rebase).
+- **Validation script update**: `tests/validate-templates.sh` was not in scope for any Phase 2/3/4 milestone. The script validates template structure (headings, frontmatter) but does NOT validate command-generated output against template format. This gap is the root cause of the drift that M6.3/M6.4 fixed. Worth a future milestone if drift recurs.
 - **Root template re-sync**: After M4.1 changed `worker.md` template, root copy was updated in the same commit. But M4.2 (workflow.md) and M4.3 (dispatch.md) were done by other sessions — verify their root copies are still in sync if uncertain.
