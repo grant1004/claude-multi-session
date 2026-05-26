@@ -297,11 +297,9 @@ No manual file reads needed — the Reviewer's first dispatch will include the o
 /multi-session:roll-call
 ```
 
-This broadcasts an introduction to each worker peer, collects acks, and prints a roster. After the roster is complete, decide which milestones go to which worker (based on the audit's parallelism analysis) and dispatch each manually via `send_message` using the `dispatch.md` template — including the first-dispatch pre-block for each worker on their first task.
+This broadcasts an introduction to each worker peer, collects acks, and prints a roster. After the roster is complete, decide which milestones go to which worker (based on the audit's parallelism analysis) and dispatch each via `send_message`. Use `/multi-session:dispatch` to auto-generate the dispatch message with file-region conflict checks and "don't touch" lists — review and edit the generated message before sending. Include the first-dispatch pre-block for each worker on their first task.
 
 From there the Reviewer drives: dispatch → Worker executes → Worker `send_message` completion-report → Reviewer reviews via `git log --stat` + `git diff` → pass or fail → next dispatch.
-
-From there, the Reviewer drives. It dispatches via `send_message`; Workers execute one milestone each, commit, and report.
 
 ## 8. Troubleshooting
 

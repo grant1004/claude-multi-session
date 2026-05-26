@@ -243,7 +243,7 @@ All 17 milestones complete (M1.1–M6.5). Phase 1–3, 3 workers, 7 waves, 0 fai
 - **Recommendation**: dispatch Wave 3a immediately to idle workers
 
 ### M7.1 — QUICKSTART.md §7c: fix duplicate paragraph + mention dispatch command
-- [ ] **Expected files**: `QUICKSTART.md`
+- [x] <!-- sessionA --> 「註」Merged duplicate "From there the Reviewer drives" paragraphs into one. Replaced "dispatch each manually via send_message" with mention of `/multi-session:dispatch` for auto-generating dispatch messages. **Expected files**: `QUICKSTART.md`
 - **Acceptance**:
   - Duplicate "From there the Reviewer drives" paragraphs (lines 302-304) merged into one coherent paragraph
   - Line 300 mentions `/multi-session:dispatch` as an alternative to manual `send_message` dispatch
