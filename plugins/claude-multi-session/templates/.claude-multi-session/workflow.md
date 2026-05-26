@@ -45,8 +45,13 @@ Full job descriptions: `roles/reviewer.md`, `roles/worker.md`, `roles/project-ma
 [Dispatch wave 2]  next milestone for each worker (or hold / standby)
                    ... loop ...
                        │
-[Wrap up]          all milestones done → each worker writes session-N.md daily summary
+[Wrap up]          all milestones done → Reviewer sends "write daily summary" to each Worker
                    Reviewer writes review-logs/YYYY-MM-DD.md + updates PROGRESS.md
+                       │
+[Verify logs]      Reviewer checks: does session-N.md exist for each Worker?
+                   → yes: proceed to cleanup
+                   → no: send_message Worker "missing daily summary, write it before I close your session"
+                   (GATE: do NOT proceed to cleanup until all daily summaries exist)
                        │
 [Cleanup]          git worktree remove ../worker-<id> && git branch -d session/<id>
                    (Reviewer runs for each Worker after session close)

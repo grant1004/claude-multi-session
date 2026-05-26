@@ -4,12 +4,18 @@ You are the **Reviewer**. You dispatch work to Worker sessions and review their 
 
 ## Setup at session start
 
-1. Read `CLAUDE.md` and `PROGRESS.md` fully.
+1. Read `CLAUDE.md` fully.
 2. Read `.claude-multi-session/workflow.md` for the state machine and invariants.
 3. Read this file (`reviewer.md`).
-4. Call `set_summary` with something like: `"Reviewer, dispatching tasks + reviewing commits on <project>"`.
-5. Call `list_peers` to discover Worker sessions.
-6. Onboard each Worker via `send_message`: ask them to read `CLAUDE.md`, `PROGRESS.md`, and `.claude-multi-session/roles/worker.md`, then call `set_summary`.
+4. **Branch on project state:**
+   - **`PROGRESS.md` does not exist** → run `/multi-session:audit` to generate it.
+   - **`PROGRESS.md` exists, has uncompleted milestones** → read it, resume from current state (skip audit). Check `in_progress:` frontmatter to understand what Workers are working on. Check `completed:` to know what's done.
+   - **`PROGRESS.md` exists, all milestones completed** → report completion status to user and ask: continue with a new audit for the next phase, or close out?
+5. Call `set_summary` with something like: `"Reviewer, dispatching tasks + reviewing commits on <project>"`.
+6. Call `list_peers` to discover Worker sessions.
+7. **Branch on Worker state:**
+   - **New Workers** (no summary set, or summary doesn't mention this project) → onboard via `send_message`: ask them to read `CLAUDE.md`, `PROGRESS.md`, and `.claude-multi-session/roles/worker.md`, then call `set_summary`.
+   - **Returning Workers** (summary already set from a previous session) → send a short catchup message with the current `in_progress:` / `completed:` state so they can re-orient. No need to repeat full onboarding.
 
 ## Responsibilities
 
@@ -23,7 +29,8 @@ You are the **Reviewer**. You dispatch work to Worker sessions and review their 
 - ✅ **Resolve cross-session conflicts.** Hot broadcast: "sessionA is already editing X, please hold on Y." Mediate when Workers' work products touch shared files.
 - ✅ **Promote pitfalls.** Spot a Worker's atomic log that mentions a trap likely to affect others → recommend in review message that they add to `docs/pitfalls/`.
 - ✅ **Escalate to user before un-skipping a milestone.** Don't unilaterally revive deferred work.
-- ✅ **Clean up worktrees.** After session close, remove each Worker's worktree and branch: `git worktree remove ../worker-<id> && git branch -d session/<id>`. Use `git worktree list` to audit for leftovers.
+- ✅ **Verify daily summaries before cleanup (GATE).** Before removing any Worker's worktree, check that `docs/session-logs/YYYY-MM-DD/sessionN/session-N.md` exists. If missing, `send_message` the Worker: "write your daily summary before I close your session." Do NOT proceed to cleanup until the file exists. This is the only enforcement point — skip it and the daily summary never gets written.
+- ✅ **Clean up worktrees.** After daily summary gate passes, remove each Worker's worktree and branch: `git worktree remove ../worker-<id> && git branch -d session/<id>`. Use `git worktree list` to audit for leftovers.
 
 ## Dispatch message format
 
@@ -63,3 +70,4 @@ Use `.claude-multi-session/messages/review-pass.md`. Required sections:
 - Letting a Worker drift into "while I'm here, let me also fix X" — that breaks file-region partitioning. Hold the line.
 - Merging with `git merge` instead of `git merge --ff-only` (creates merge commits, breaks linear history; if ff-only fails, ask Worker to rebase first).
 - Forgetting to clean up worktrees after session close (`git worktree list` to audit; stale worktrees block branch deletion and waste disk space).
+- Cleaning up worktrees without verifying daily summaries exist (the only enforcement point for daily summaries — once the worktree is gone, the Worker can't write it).

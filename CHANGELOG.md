@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `reviewer.md` setup flow now branches on project state: no PROGRESS.md → audit, uncompleted milestones → resume, all completed → ask user for next phase or close out. Also distinguishes new vs returning Workers in onboarding step.
+- Added daily summary enforcement gate: Reviewer must verify `session-N.md` exists before worktree cleanup. `workflow.md` state machine now has `[Verify logs]` step between `[Wrap up]` and `[Cleanup]`. `completion-report.md` includes daily summary status field. `worker.md` marks daily summary as ENFORCED with warning that Reviewer blocks cleanup.
 - Synced root `.claude-multi-session/` templates to match v0.2.0 plugin source (10 files updated, resolving v0.1.0 drift)
 
 ## [0.2.0] - 2026-05-26

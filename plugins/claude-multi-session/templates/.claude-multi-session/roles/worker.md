@@ -25,7 +25,7 @@ You are a **Worker** session. You execute milestones dispatched by the Reviewer.
   - Optionally the atomic log file (next item)
 - ✅ **Atomic log per milestone.** Write `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` using `.claude-multi-session/log-templates/atomic.md`. Frontmatter includes status (`review-pending`), commit hash, dispatch source.
 - ✅ **Completion report.** `send_message` Reviewer using `.claude-multi-session/messages/completion-report.md` format — commit hash + file change list + acceptance-criteria mapping + auto-pass criteria check.
-- ✅ **Daily summary at session close.** Write `docs/session-logs/YYYY-MM-DD/sessionN/session-N.md` (daily handoff package) using `.claude-multi-session/log-templates/daily.md`. Don't compress for length — this is your gift to the next session that picks up.
+- ✅ **Daily summary at session close (ENFORCED).** Write `docs/session-logs/YYYY-MM-DD/sessionN/session-N.md` (daily handoff package) using `.claude-multi-session/log-templates/daily.md`. Don't compress for length — this is your gift to the next session that picks up. **Reviewer will block worktree cleanup until this file exists.** Write it after your last milestone's review pass, before going idle.
 - ✅ **Pitfalls.** If you hit a non-trivial trap (cost you >15 min, or could affect other sessions): create / update an entry in `docs/pitfalls/` using `.claude-multi-session/log-templates/pitfall.md`. Atomic log only mentions it via `[[pitfall-slug]]` wikilink.
 - ✅ **Standby contribution.** When idle, Reviewer may pull you in as a context-source for a session about to touch a file you recently changed. Provide brief, accurate context.
 
@@ -55,3 +55,4 @@ Wait for Reviewer's resolution. Do not write code around the issue.
 - Updating shared sections of PROGRESS.md (Reviewer-only domain — "現在進度", "設計決策變更紀錄").
 - Committing to `main` instead of your `session/<id>` branch (bypasses review; use `git branch --show-current` to verify before committing).
 - Forgetting to rebase before starting a new milestone (you'll miss other Workers' merged changes and the Reviewer's `--ff-only` merge will fail).
+- Skipping the daily summary at session close (Reviewer gates cleanup on this file existing — your session will hang in limbo until you write it).
