@@ -1,20 +1,20 @@
 ---
 skipped: []
-in_progress: [M5.1, M5.2]
-completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3]
+in_progress: [M6.1, M6.2, M6.5]
+completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-Phase 2 Wave 1 complete (M4.1–M4.3). Wave 2 dispatching (M5.1, M5.2).
+Phase 2 complete (M4.1–M5.2). Phase 3 doc-consistency fixes: Wave 3a dispatching (M6.1, M6.2, M6.5).
 
 ## Audit summary
 
 - **Project**: claude-multi-session — Claude Code plugin providing multi-session parallel coding workflow (Reviewer/Worker roles, dispatch protocol, structured logging) over `claude-peers-mcp`
 - **Tech stack**: Pure markdown plugin (no build step), PowerShell + bash launcher scripts, Git as synchronization primitive. Depends on `claude-peers-mcp` (Bun/TypeScript, external).
-- **Architecture quick-take**: 5 slash commands under `plugins/claude-multi-session/commands/multi-session/` (init, audit, roll-call, bootstrap, status), 11 template files in `plugins/claude-multi-session/templates/.claude-multi-session/` (3 roles, 3 messages, 4 log formats, 1 workflow doc), 2 launcher scripts in `plugins/claude-multi-session/scripts/`. No runtime code — logic lives in command prompt files. Root `.claude-multi-session/` is the dogfood copy for this repo's own workflow.
+- **Architecture quick-take**: 9 slash commands under `plugins/claude-multi-session/commands/multi-session/` (init, audit, roll-call, bootstrap, status, upgrade, dispatch, self-check, review), 11 template files in `plugins/claude-multi-session/templates/.claude-multi-session/` (3 roles, 3 messages, 4 log formats, 1 workflow doc), 2 launcher scripts in `plugins/claude-multi-session/scripts/`. No runtime code — logic lives in command prompt files. Root `.claude-multi-session/` is the dogfood copy for this repo's own workflow.
 - **Hotspots** (last 30 commits):
   - `PROGRESS.md` (8 commits) — updated by every milestone + reviewer
   - `plugins/.../commands/multi-session/audit.md` (4 commits) — most-iterated command
@@ -22,10 +22,10 @@ Phase 2 Wave 1 complete (M4.1–M4.3). Wave 2 dispatching (M5.1, M5.2).
   - `CHANGELOG.md` (3 commits)
   - `plugins/.../templates/.claude-multi-session/workflow.md` (2 commits)
 - **現狀**:
-  - **Done**: Plugin scaffolding, 5 commands, all role/message/log templates, cross-platform launchers, worktree isolation model, ADR-001 implemented in audit.md, QUICKSTART, README, CHANGELOG
-  - **Half-done**: Root `.claude-multi-session/` templates stuck at v0.1.0 (missing worktree model, updated rules from v0.2.0 plugin source)
-  - **Not started**: Automated tests, CI, upgrade path for existing projects, dispatch/review/self-check helper commands
-- **已知限制**: None stated by user. Observed: root template drift should be fixed without diverging from plugin source templates.
+  - **Done**: Plugin scaffolding (9 commands), all role/message/log templates, cross-platform launchers, worktree isolation model, ADR-001 in audit.md, QUICKSTART, README, CHANGELOG, root template sync (M1.1), upgrade command (M1.2), validation script + CI (M2.1/M2.2), dispatch/self-check/review helper commands (M3.1-M3.3), codebase-memory integration in templates (M4.1-M4.3)
+  - **In progress**: codebase-memory in dispatch + review commands (M5.1-M5.2)
+  - **Known gaps**: Documentation cross-consistency issues (dispatch command/template rule mismatch, roll-call.md stale claims, daily.md broken wikilink) — tracked as Phase 3 milestones (M6.x)
+- **已知限制**: Documentation accumulated drift from rapid multi-phase development. Phase 3 addresses cross-file consistency.
 - **Recommended worker count**: 3 (see parallelism analysis below)
 
 ## Milestones
@@ -181,10 +181,68 @@ Phase 2 Wave 1 complete (M4.1–M4.3). Wave 2 dispatching (M5.1, M5.2).
   - **Wave 2**: M5.1 + M5.2 (2 workers, 2 command files, M effort; 1 worker idle or dismissed)
 - **Recommendation**: 3 workers for Wave 1, 2 workers for Wave 2
 
+### M6.1 — daily.md template: fix broken wikilink + stale PROGRESS.md section reference
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/log-templates/daily.md`, `.claude-multi-session/log-templates/daily.md`
+- **Acceptance**:
+  - `[[progress-md-race-condition]]` replaced with `[[progress-md-race]]` (matching actual pitfall filename `docs/pitfalls/progress-md-race.md`)
+  - Onboarding step referencing PROGRESS.md 「卡關紀錄」 removed or updated (PROGRESS.md has no such section; the actual section names are 「現在進度」「設計決策變更紀錄」)
+  - Root copy byte-identical to plugin source
+- **Effort**: S
+- **ROI**: medium — broken wikilinks break Obsidian navigation for future sessions reading handoff packages
+
+### M6.2 — roll-call.md: remove stale "no dispatch command" claim
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/roll-call.md`
+- **Acceptance**:
+  - The paragraph claiming dispatch is "intentionally manual (no /multi-session:dispatch slash command)" is removed or rewritten to acknowledge the command exists
+  - No other functional changes to roll-call.md behavior
+- **Effort**: S
+- **ROI**: medium — stale claim directly contradicts M3.1's work; confuses Reviewers reading the command
+
+### M6.3 — dispatch command: align rules + onboarding with template
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
+- **Acceptance**:
+  - Generated dispatch message's rule 6 matches template's rule 6 (acceptance criteria with executable tests → must pass before commit)
+  - Generated onboarding pre-block includes all steps from template (including step 6 codebase-memory, matching template's `messages/dispatch.md`)
+  - Generated dispatch message includes Auto-pass criteria section (for 🤖-marked milestones, matching template)
+  - "rebase main" rule preserved — either as rule 7 or moved to 🔒 section preamble
+- **Effort**: M
+- **ROI**: high — dispatch command generates messages that don't match the template format, which defeats the purpose of having a template
+- **Dependency**: M5.1 must be merged first (SessionA is currently editing this file)
+
+### M6.4 — review command: align post-review steps with template
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
+- **Acceptance**:
+  - Post-review actions list matches review-pass.md template's "After-pass actions": merge → update review-logs → update atomic log status → update PROGRESS.md → dispatch next (or standby)
+  - "send_message the verdict" step is included (command-specific, not in template — that's fine, but ordering should be explicit: send verdict THEN do post-review housekeeping)
+- **Effort**: S
+- **ROI**: medium — mismatched step lists between command output and template confuse Reviewers following the process
+- **Dependency**: M5.2 must be merged first (SessionB is currently editing this file)
+
+### M6.5 — README.md + CHANGELOG.md: fix minor reference errors
+- [ ] **Expected files**: `README.md`, `CHANGELOG.md`
+- **Acceptance**:
+  - README.md `scripts/` reference corrected to `plugins/claude-multi-session/scripts/` or made unambiguous
+  - CHANGELOG.md "steps 1-8" corrected to match actual QUICKSTART.md section count
+- **Effort**: S
+- **ROI**: low — cosmetic but misleading for new users reading the README
+
+## Phase 3 parallelism analysis
+
+- Source: documentation cross-audit (2026-05-27)
+- Sequencing constraints:
+  - M6.3 depends on M5.1 (both touch `commands/multi-session/dispatch.md`)
+  - M6.4 depends on M5.2 (both touch `commands/multi-session/review.md`)
+  - M6.1, M6.2, M6.5 have no dependencies — can dispatch immediately
+- Wave plan (3 workers):
+  - **Wave 3a** (now): M6.1 + M6.2 + M6.5 (3 workers, no overlap, all S effort)
+  - **Wave 3b** (after M5.1 + M5.2 merge): M6.3 + M6.4 (2 workers, M + S effort)
+- **Recommendation**: dispatch Wave 3a immediately to idle workers
+
 ## 待用戶決定 / Pending user decision
 
 (None.)
 
 ## 設計決策變更紀錄 / Decision changelog
 
+- 2026-05-27: Phase 3 milestones added — documentation cross-consistency fixes (M6.1–M6.5). Source: automated cross-audit of all md files.
 - 2026-05-27: Phase 2 milestones added — codebase-memory integration across workflow (M4.1–M5.2). Driven by ADR-001 §3 gap: codebase-memory was only in audit.md, not in Worker/Reviewer daily workflow.
