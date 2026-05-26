@@ -133,7 +133,8 @@ Phase 2 audit complete — 5 milestones (M4.1–M5.2), codebase-memory MCP integ
 - **ROI**: high — Workers are the primary code readers; codebase-memory gives them architectural context instead of blind file-by-file grep
 
 ### M4.2 — workflow.md: add codebase-memory to roles table and tooling note
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `.claude-multi-session/workflow.md`
+- [x] <!-- sessionB --> 「註」Added "Code exploration" column to Roles table (Worker: codebase-memory → Glob/Grep/Read, Reviewer: codebase-memory → git diff, PM: N/A). Added tooling-note paragraph after table explaining ToolSearch loading, silent fallback, and audit.md §4a reference. Root copy byte-identical to plugin source.
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `.claude-multi-session/workflow.md`
 - **Acceptance**:
   - "Roles at a glance" table has a new column "Code exploration" showing tool priority per role (Worker: codebase-memory → Glob/Grep/Read, Reviewer: codebase-memory → git diff, PM: N/A)
   - A short paragraph (not a new section) after the table explains the codebase-memory try→fallback pattern and links to audit.md §4a for the full three-tier logic

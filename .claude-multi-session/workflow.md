@@ -6,13 +6,15 @@ Communication channel: [`louislva/claude-peers-mcp`](https://github.com/louislva
 
 ## Roles at a glance
 
-| Role | Writes code? | Maintains `PROGRESS.md`? | Reads | Writes log |
-|---|---|---|---|---|
-| Reviewer | No | `## 現在進度` line only | All worker commits | `docs/review-logs/YYYY-MM-DD.md` |
-| Worker | Yes (own milestone only) | Own checkbox + 「註」 | Own dispatch + own diff | `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` + `session-N.md` |
-| Project Manager (4+ workers) | No | No (delegates to Reviewer) | Reviewer's master log | Cross-day summary for user |
+| Role | Writes code? | Maintains `PROGRESS.md`? | Reads | Writes log | Code exploration |
+|---|---|---|---|---|---|
+| Reviewer | No | `## 現在進度` line only | All worker commits | `docs/review-logs/YYYY-MM-DD.md` | codebase-memory → `git diff` |
+| Worker | Yes (own milestone only) | Own checkbox + 「註」 | Own dispatch + own diff | `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` + `session-N.md` | codebase-memory → Glob/Grep/Read |
+| Project Manager (4+ workers) | No | No (delegates to Reviewer) | Reviewer's master log | Cross-day summary for user | N/A |
 
 Full job descriptions: `roles/reviewer.md`, `roles/worker.md`, `roles/project-manager.md`.
+
+**Tooling note:** codebase-memory MCP (`search_graph`, `trace_path`, `get_code_snippet`, etc.) is the preferred first tool for understanding code structure — use `ToolSearch` to load its schema at session start. If the MCP server is not available, fall back silently to Glob/Grep/Read (Workers) or `git diff`/`git log` (Reviewer). The full three-tier install-or-fallback logic lives in `audit.md` §4a; roles other than audit never ask the user to install.
 
 ## State machine
 
