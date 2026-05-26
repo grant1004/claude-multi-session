@@ -1,6 +1,6 @@
 ---
 skipped: []
-in_progress: []
+in_progress: [M7.1, M7.2]
 completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5]
 ---
 
@@ -242,11 +242,35 @@ All 17 milestones complete (M1.1–M6.5). Phase 1–3, 3 workers, 7 waves, 0 fai
   - **Wave 3b** (after M5.1 + M5.2 merge): M6.3 + M6.4 (2 workers, M + S effort)
 - **Recommendation**: dispatch Wave 3a immediately to idle workers
 
+### M7.1 — QUICKSTART.md §7c: fix duplicate paragraph + mention dispatch command
+- [ ] **Expected files**: `QUICKSTART.md`
+- **Acceptance**:
+  - Duplicate "From there the Reviewer drives" paragraphs (lines 302-304) merged into one coherent paragraph
+  - Line 300 mentions `/multi-session:dispatch` as an alternative to manual `send_message` dispatch
+- **Effort**: S
+- **ROI**: medium — QUICKSTART is the onboarding entry point; duplicate text and missing command reference confuse new users
+
+### M7.2 — dispatch template: sync rule 7 (rebase) from command
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/dispatch.md`
+- **Acceptance**:
+  - Template rules section has 7 rules matching the dispatch command's 7 rules (rule 7 = rebase main before committing)
+  - Header updated from "all six required" to "all seven required"
+  - Root copy byte-identical to plugin source
+- **Effort**: S
+- **ROI**: high — M6.3 added rule 7 to the command but didn't sync the template, creating the exact kind of drift Phase 3 was supposed to fix
+
+## Phase 4 parallelism analysis
+
+- Source: re-review audit (2026-05-27)
+- No dependencies between M7.1 and M7.2 — different files
+- Wave plan: 2 workers in parallel
+
 ## 待用戶決定 / Pending user decision
 
 (None.)
 
 ## 設計決策變更紀錄 / Decision changelog
 
+- 2026-05-27: Phase 4 milestones added — re-review residual fixes (M7.1–M7.2).
 - 2026-05-27: Phase 3 milestones added — documentation cross-consistency fixes (M6.1–M6.5). Source: automated cross-audit of all md files.
 - 2026-05-27: Phase 2 milestones added — codebase-memory integration across workflow (M4.1–M5.2). Driven by ADR-001 §3 gap: codebase-memory was only in audit.md, not in Worker/Reviewer daily workflow.
