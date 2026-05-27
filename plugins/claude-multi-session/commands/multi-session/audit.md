@@ -173,11 +173,23 @@ audit phase complete — awaiting user to select milestones for dispatch.
 (Empty at audit time; Reviewer appends as decisions are made during dispatch.)
 ```
 
-### 8. Report and stop
+### 8. Create session branch
+
+After writing PROGRESS.md, create the session branch that Workers will branch from:
+
+1. **Check for existing session branch**: `git branch --list 'session/*'`. If one already exists (catchup/resume mode), skip creation and note the existing branch name for the report.
+2. **Derive slug**: Use the project basename or the user's stated goal from Grill Q1 to build a short slug (lowercase, hyphens, no spaces). Example: `session/2026-05-27-add-auth`.
+3. **Create branch**: `git checkout -b session/<YYYY-MM-DD>-<slug> main`
+4. **Return to main**: `git checkout main` (audit stays on main; Workers will branch from the session branch later).
+
+The session branch name will be included in the report (§9) so the Reviewer can reference it when creating worktrees.
+
+### 9. Report and stop
 
 Print a summary to the user:
 - Path to the produced `PROGRESS.md`
 - Milestone count + recommended worker count
+- **Session branch**: the name of the created (or existing) session branch
 - Top 1-2 "待用戶決定" items (if any)
 - Suggested next action (e.g. "Open N more terminals, run `claude-peers -id sessionA` etc., then come back and tell me which milestones to dispatch.")
 

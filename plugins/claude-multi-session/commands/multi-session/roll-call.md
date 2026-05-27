@@ -76,7 +76,7 @@ After ~60 seconds, print the roster + status:
 
 After roster is printed, stop. **Do not** start dispatching milestones unilaterally — the user picks which Worker gets which milestone (or tells you to use the audit's recommendation).
 
-The dispatch step is intentionally manual (no `/multi-session:dispatch` slash command), because each dispatch carries context-specific "don't touch" lists that the Reviewer must reason about per-event.
+The Reviewer dispatches via `/multi-session:dispatch`, which auto-generates the "don't touch" list and conflict checks. The Reviewer still reviews and edits the generated message before sending — dispatch is assisted, not fully automatic.
 
 ## Behavior rules
 
