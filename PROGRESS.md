@@ -280,7 +280,8 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: high — defines the core model all other files follow
 
 ### M8.2 — reviewer.md: update responsibilities for session branch model
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/roles/reviewer.md`
+- [x] <!-- sessionB --> 「註」Setup step 4: three-way branch now references session branch creation (audit), session branch existence check (resume), and finalize-or-new-audit (all complete). Responsibilities: worktree from session branch, review/merge against session branch (not main), new "Finalize session" with --no-ff + AskUserQuestion, cleanup deletes worker/<id> then session branch post-finalize. Common mistakes: added "merge to main instead of session branch" and "delete session branch before finalize". First-dispatch path updated to worker/<id>. Root copy byte-identical.
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/roles/reviewer.md`
 - **Acceptance**:
   - Setup section: step 4 branch logic includes "create session branch if starting a new session" (after audit creates PROGRESS.md)
   - Responsibilities: "Create worktrees" uses `git worktree add ../worker-<id> -b worker/<id> session/<slug>`
