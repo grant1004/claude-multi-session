@@ -327,7 +327,7 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: high — entry point for the entire branch-based lifecycle
 
 ### M8.6 — dispatch.md command: update generated messages for session branch
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
+- [x] <!-- sessionA --> 「註」Added session branch auto-detection in context + pre-flight (git branch --list 'session/*'). Updated: onboarding step 0 verifies worker/<id>, worktree info says worker/<id>, rule 4 commits to worker/<id>, rule 7 rebases session/<slug>, worktree creation hint branches from session/<slug>. **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
 - **Acceptance**:
   - Generated onboarding pre-block: worktree verify uses `worker/<id>` branch, worktree created from session branch
   - Generated rules: rule 4 says `worker/<id>`, rule 7 rebase target is session branch (auto-detected from `git branch --list 'session/*'`)

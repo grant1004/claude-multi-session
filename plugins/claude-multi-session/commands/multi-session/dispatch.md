@@ -7,6 +7,7 @@ description: Reviewer dispatch helper — generates a pre-filled dispatch messag
 
 - Project root: !`pwd`
 - `PROGRESS.md` exists: !`test -f PROGRESS.md && echo "yes" || echo "no (run /multi-session:audit first)"`
+- Session branch: !`git branch --list 'session/*' | head -1 | tr -d ' ' || echo "(none)"`
 - Worktree list: !`git worktree list 2>/dev/null || echo "(not a git repo)"`
 
 ## Your task
@@ -18,6 +19,7 @@ You are the **Reviewer** preparing a dispatch message for a Worker. This command
 ### 1. Pre-flight checks
 
 - If `PROGRESS.md` doesn't exist, tell the user to run `/multi-session:audit` first. Stop.
+- Detect the session branch: run `git branch --list 'session/*'`. If exactly one match, use it as `session/<slug>` for all subsequent steps. If zero matches, warn "no session branch found — create one with `git checkout -b session/<YYYY-MM-DD>-<slug> main`" and stop. If multiple matches, ask the Reviewer which one to use via `AskUserQuestion`.
 - Read `PROGRESS.md` in full before proceeding.
 
 ### 2. Load codebase-memory tools (two-tier)
@@ -144,12 +146,12 @@ Ask the Reviewer: "Include first-dispatch onboarding pre-block?" with `AskUserQu
 
 **Worktree info** — derive from git worktree list or from naming convention:
 - Worker worktree path: `../worker-<sessionId>` (relative to project root), or use absolute path from `git worktree list` if available
-- Worker branch: `session/<sessionId>`
+- Worker branch: `worker/<sessionId>` (branched from session branch)
 
 If the worktree for this worker is not visible in `git worktree list`, note this in the generated message — the Reviewer may need to create it first:
 ```
 ⚠️ Worktree for <sessionId> not found. Create it before sending:
-  git worktree add ../worker-<sessionId> -b session/<sessionId>
+  git worktree add ../worker-<sessionId> -b worker/<sessionId> session/<slug>
 ```
 
 ### 9. Generate the dispatch message
@@ -180,7 +182,7 @@ If first-dispatch, prepend the onboarding pre-block:
 ```
 👋 First dispatch in this session. Before touching the milestone below, do this onboarding **once**:
 
-0. Switch to your worktree: `cd <worktree-path>` — verify `git branch --show-current` shows `session/<sessionId>`. If either is wrong, stop and tell me.
+0. Switch to your worktree: `cd <worktree-path>` — verify `git branch --show-current` shows `worker/<sessionId>`. If either is wrong, stop and tell me.
 1. Read .claude-multi-session/roles/worker.md (your job description)
 2. Read .claude-multi-session/workflow.md (state machine)
 3. Read .claude-multi-session/messages/completion-report.md (the format you'll send back)
@@ -188,7 +190,7 @@ If first-dispatch, prepend the onboarding pre-block:
 5. set_summary("Worker <sessionId> — working on <project basename>")
 6. Load codebase-memory tools (optional but recommended): use `ToolSearch` to load `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If unavailable, proceed with Glob/Grep/Read — the tools are helpful but not required.
 
-Your worktree is at `<worktree-path>`, branch `session/<sessionId>`. All commits go to this branch — never commit directly to main.
+Your worktree is at `<worktree-path>`, branch `worker/<sessionId>`. All commits go to this branch — never commit directly to the session branch or main.
 
 Confirm via send_message back: "✅ Onboarded, starting Mx.y" — then start. The dispatch follows.
 
@@ -215,12 +217,12 @@ Then the dispatch block:
 1. Only do Mx.y; stop and report when done. No scope creep.
 2. Build 0 error required before commit (<build command>).
 3. Commit message format: `Mx.y: <description>`.
-4. Commits go to `session/<sessionId>` branch, not main. Verify with `git branch --show-current` before committing.
+4. Commits go to `worker/<sessionId>` branch, not the session branch or main. Verify with `git branch --show-current` before committing.
 5. Same commit must include:
    - `PROGRESS.md` checkbox update (Mx.y `[ ] → [x]`) + 「註」 column with implementation notes
    - **Atomic log file** at `docs/session-logs/<today>/sessionN/Mx.y-sessionN.md` (use template `.claude-multi-session/log-templates/atomic.md`)
 6. Acceptance criteria 含可執行測試（e.g. `npm test`, `curl ...`）→ 測試必須 pass 才能 commit。
-7. Before committing: `git rebase main` to ensure your branch is up to date.
+7. Before committing: `git rebase session/<slug>` to ensure your branch is up to date with the session branch.
 
 If you skip the atomic log or PROGRESS.md update, the review will fail and you'll redo the commit. This is enforced — not optional.
 
