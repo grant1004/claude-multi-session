@@ -1,14 +1,14 @@
 ---
 skipped: []
-in_progress: [M8.1, M8.2, M8.3]
-completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5, M7.1, M7.2]
+in_progress: []
+completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5, M7.1, M7.2, M8.1, M8.2, M8.3, M8.4, M8.5, M8.6, M8.7, M8.8, M8.9]
 ---
 
 # PROGRESS
 
 ## 現在進度
 
-Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
+All 28 milestones complete (M1.1–M8.9). Phase 1–5, 3 workers, 0 failures, 0 git conflicts.
 
 ## Audit summary
 
