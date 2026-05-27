@@ -7,19 +7,21 @@ description: Reviewer review helper — reads git diff, compares against accepta
 
 - Project root: !`pwd`
 - `PROGRESS.md` exists: !`test -f PROGRESS.md && echo "yes" || echo "no (run /multi-session:audit first)"`
-- Git branches: !`git branch --list 'session/*' 2>/dev/null || echo "(no session branches)"`
+- Session branches: !`git branch --list 'session/*' 2>/dev/null || echo "(no session branches)"`
+- Worker branches: !`git branch --list 'worker/*' 2>/dev/null || echo "(no worker branches)"`
 - Worktree list: !`git worktree list 2>/dev/null || echo "(not a git repo)"`
 
 ## Your task
 
 You are the **Reviewer** conducting a structured review of a Worker's completed milestone. This command automates: reading the diff, extracting acceptance criteria, comparing them, and generating a review verdict message. You still make the pass/fail judgment and edit the message before sending.
 
-**This command generates output you review and copy into `send_message`.** The only write action it can take is `git merge --ff-only` on explicit user confirmation.
+**This command generates output you review and copy into `send_message`.** The only write actions it can take are `git merge --ff-only` (worker → session branch) and `git merge --no-ff` (session → main, finalize) on explicit user confirmation.
 
 ### 1. Pre-flight checks
 
 - If `PROGRESS.md` doesn't exist, tell the user to run `/multi-session:audit` first. Stop.
 - Read `PROGRESS.md` in full before proceeding.
+- **Detect session branch**: run `git branch --list 'session/*'`. If exactly one exists, use it as the merge target. If multiple exist, ask the user which one. If none exist, fall back to `main` as the base branch (legacy mode).
 
 ### 2. Load codebase-memory tools (optional)
 
@@ -34,17 +36,17 @@ Check if the user provided arguments (milestone ID and/or branch). If not, use `
 
 **Question 1 — "Which milestone to review?"**
 - Build the option list from milestones in `in_progress:` frontmatter (these are the ones awaiting review).
-- If `in_progress:` is empty, check for session branches with commits ahead of main (`git log main..session/<id> --oneline` for each `session/*` branch). List milestones whose `[x]` checkbox is set but are still in `in_progress:`.
+- If `in_progress:` is empty, check for worker branches with commits ahead of the session branch (`git log <session-branch>..worker/<id> --oneline` for each `worker/*` branch). List milestones whose `[x]` checkbox is set but are still in `in_progress:`.
 - Each option label: `Mx.y — <short description>`
 - Each option description: session assignment if known from `<!-- sessionId -->` comment
 
 **Question 2 — "Which worker branch?"**
-- Options: `session/*` branches that have commits ahead of main
-- Derive from `git branch --list 'session/*'` + `git log main..<branch> --oneline` (skip branches with 0 commits ahead)
-- Each option label: branch name (e.g. `session/sessionA`)
-- Each option description: `N commits ahead of main`
+- Options: `worker/*` branches that have commits ahead of the session branch
+- Derive from `git branch --list 'worker/*'` + `git log <session-branch>..<branch> --oneline` (skip branches with 0 commits ahead)
+- Each option label: branch name (e.g. `worker/sessionA`)
+- Each option description: `N commits ahead of session branch`
 
-If only one session branch has commits ahead of main, auto-select it and skip the question.
+If only one worker branch has commits ahead of the session branch, auto-select it and skip the question.
 
 ### 4. Read acceptance criteria
 
@@ -56,15 +58,15 @@ Also extract:
 
 ### 5. Read the diff
 
-Run these commands and capture output:
+Run these commands and capture output (using the session branch detected in step 1):
 
 ```bash
-git log main..<branch> --stat --oneline
-git diff main..<branch>
+git log <session-branch>..<worker-branch> --stat --oneline
+git diff <session-branch>..<worker-branch>
 ```
 
 Also check:
-- **File scope compliance**: compare actually-changed files (from `git diff --name-only main..<branch>`) against the expected files list. Flag any unexpected files or missing expected files.
+- **File scope compliance**: compare actually-changed files (from `git diff --name-only <session-branch>..<worker-branch>`) against the expected files list. Flag any unexpected files or missing expected files.
 - **Commit message format**: check that commit messages match `Mx.y: <description>` pattern.
 - **PROGRESS.md updated**: verify the diff includes a change to the milestone's checkbox line.
 - **Atomic log present**: check if `docs/session-logs/*/session*/Mx.y-session*.md` exists in the diff.
@@ -110,7 +112,7 @@ Also run the rule compliance checks:
 - File scope matches dispatch: ✅ / ❌ <list unexpected files if any>
 - PROGRESS.md checkbox updated: ✅ / ❌
 - Atomic log written: ✅ / ❌
-- Branch is session/<id> (not main): ✅ / ❌
+- Branch is worker/<id> (not main or session branch): ✅ / ❌
 ```
 
 ### 7. Recommend verdict
@@ -169,16 +171,27 @@ Output the message as a **fenced code block** the Reviewer can copy into `send_m
 
 If verdict is PASS, ask the Reviewer:
 
-"Merge `<branch>` into main now? (`git merge --ff-only`)"
+"Merge `<worker-branch>` into `<session-branch>` now? (`git merge --ff-only`)"
 - Options: "Yes — merge now" / "No — I'll merge manually later"
 
 If yes:
 ```bash
-git checkout main
-git merge --ff-only <branch>
+git checkout <session-branch>
+git merge --ff-only <worker-branch>
 ```
 
-If `--ff-only` fails, report the error and suggest the Worker rebase: "Ask the Worker to run `git rebase main` on their branch, then re-merge."
+If `--ff-only` fails, report the error and suggest the Worker rebase: "Ask the Worker to run `git rebase <session-branch>` on their branch, then re-merge."
+
+After merge (or skip), check if **all milestones in PROGRESS.md are now completed** (no unchecked `- [ ]` milestones remain, and `in_progress:` frontmatter is empty or will be after this one). If so, offer finalization:
+
+"All milestones complete. Finalize session — merge `<session-branch>` into main? (`git merge --no-ff`)"
+- Options: "Yes — finalize now" / "No — I'll finalize later"
+
+If yes:
+```bash
+git checkout main
+git merge --no-ff <session-branch>
+```
 
 After merge (or skip), remind:
 
@@ -191,6 +204,15 @@ After merge (or skip), remind:
 5. Dispatch next milestone to the Worker (use /multi-session:dispatch), or send "Standby"
 ```
 
+If finalization was executed, add:
+
+```
+📝 Post-finalize actions:
+1. Delete worker branches: `git branch -d worker/<id>` for each worker
+2. Delete session branch: `git branch -d <session-branch>`
+3. Remove worktrees: `git worktree remove ../worker-<id>` for each worker
+```
+
 ### 10. Stop
 
 After outputting the verdict message and post-review reminders, stop. Do not:
@@ -201,7 +223,7 @@ After outputting the verdict message and post-review reminders, stop. Do not:
 
 ## Behavior rules
 
-- This command is **read-only** except for the optional `git merge --ff-only` step (which requires explicit user confirmation via `AskUserQuestion`).
+- This command is **read-only** except for the optional merge steps: `git merge --ff-only` (worker → session branch) and `git merge --no-ff` (session → main, finalize). Both require explicit user confirmation via `AskUserQuestion`.
 - Never `send_message` to workers. The Reviewer reviews the generated message, edits it, and sends manually.
 - Be honest in acceptance criteria verdicts. If the diff doesn't clearly prove a criterion is met, say "partial" or "not met" — don't assume.
 - When reading diffs, focus on substance over formatting. A criterion about "file X has property Y" should be checked by reading the actual file content in the diff, not just the filename.

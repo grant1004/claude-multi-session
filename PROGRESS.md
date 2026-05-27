@@ -337,7 +337,8 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: high — dispatch command generates the actual messages Workers follow
 
 ### M8.7 — review.md command: merge to session branch + finalize option
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
+- [x] <!-- sessionB --> 「註」Step 1: session branch auto-detection (single→use, multiple→ask, none→legacy fallback to main). Step 3: worker/* branch detection against session branch. Step 5: diff against session branch. Step 6: branch compliance check updated to worker/<id>. Step 9: merge target is session branch (--ff-only), finalize option when all milestones done (--no-ff session→main with AskUserQuestion), post-finalize cleanup actions. Behavior rules updated for dual merge types. Context section lists both session and worker branches.
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
 - **Acceptance**:
   - Merge step (§9): target is session branch, not main. `git checkout session/<slug> && git merge --ff-only worker/<id>`
   - Worker branch detection: looks for `worker/*` branches (not `session/*`)
