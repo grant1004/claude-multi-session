@@ -358,7 +358,8 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: medium — self-check must use correct diff target
 
 ### M8.9 — QUICKSTART.md: update flow for branch-based lifecycle
-- [ ] **Expected files**: `QUICKSTART.md`
+- [x] <!-- sessionB --> 「註」§7a: audit creates session branch + "main stays untouched until finalization". §7b: Workers get `worker/<id>` branches from session branch. §7c: dispatch flow mentions worker branches, merge to session branch (--ff-only), rebase on session branch. New §7d: finalize session → main (--no-ff) with user confirmation, then cleanup. No duplicate paragraphs.
+- **Expected files**: `QUICKSTART.md`
 - **Acceptance**:
   - §7 flow description mentions session branch creation after audit
   - §7c mentions worker branches are `worker/<id>`, branched from session branch
