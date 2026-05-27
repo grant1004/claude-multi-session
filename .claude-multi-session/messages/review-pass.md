@@ -45,12 +45,27 @@ Standby for now; I'll dispatch again in ~<duration> or when blocker clears.
 
 ## After-pass actions for the Reviewer
 
-1. Update `docs/review-logs/YYYY-MM-DD.md`:
+1. **Merge the Worker's branch into the session branch:**
+   ```bash
+   git checkout session/<slug>
+   git merge --ff-only worker/<id>
+   ```
+   If `--ff-only` fails, ask the Worker to rebase onto the session branch first (`git rebase session/<slug>`), then re-merge.
+2. Update `docs/review-logs/YYYY-MM-DD.md`:
    - Add row to "Review pass 一覽" table (milestone | session | commit | round | atomic log wikilink)
    - Add `## Mx.y-sessionN` heading section with: 「做了什麼 / 如何驗證 / 評語」
-2. Update Worker's atomic log status field (or remind Worker to do so).
-3. Update `PROGRESS.md` 「現在進度」 line.
-4. Dispatch next milestone (or Hold) — same message can chain dispatch into review pass.
+3. Update Worker's atomic log status field (or remind Worker to do so).
+4. Update `PROGRESS.md` 「現在進度」 line.
+5. Dispatch next milestone (or Hold) — same message can chain dispatch into review pass.
+
+## Session-close cleanup (after all milestones done)
+
+```bash
+git worktree remove ../worker-<id>
+git branch -d worker/<id>
+```
+
+Use `git worktree list` to audit for leftover worktrees from crashed sessions.
 
 ## After-fail actions
 

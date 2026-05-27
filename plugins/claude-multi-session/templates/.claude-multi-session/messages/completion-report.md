@@ -22,6 +22,7 @@ Copy this block when reporting milestone completion via `send_message`.
 🔍 規則合規 / Rule compliance:
 - Build 0 error ✓
 - Commit message format ✓ (`Mx.y: ...`)
+- Committed to `worker/<id>` branch (not session branch or main) ✓
 - Didn't touch <other sessions' regions> ✓
 - PROGRESS.md updated ✓
 - Atomic log written ✓
@@ -35,6 +36,10 @@ Copy this block when reporting milestone completion via `send_message`.
 
 🔍 踩坑 / Pitfalls hit (if any):
 - [[env-var-shadow]] — hit this one; updated the pitfall entry with my workaround.
+
+📝 Daily summary status:
+- [ ] session-N.md written (if this is my last milestone — Reviewer will block cleanup until this exists)
+- [ ] Not my last milestone — will write at session close
 
 待 review.
 ```

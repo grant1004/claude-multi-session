@@ -9,6 +9,7 @@ Worker writes this when a milestone is completed (before sending the completion-
 title: Mx.y — <one-line description>
 session: sessionN
 milestone: Mx.y
+branch: session/<id>
 date: YYYY-MM-DD
 commit: <hash>
 status: review-pending      # in-progress / review-pending / review-pass / review-fail
@@ -26,7 +27,7 @@ daily: "[[session-N]]"                   # back-link to this session's daily sum
 - (only list non-trivial changes; PROGRESS.md tick + boilerplate not needed)
 
 ## 🎯 實作要點 / 設計決策 / Implementation notes
-1. **<decision title, e.g. "Chose DataTrigger + MultiBinding over ListBox">**
+1. **<decision title, e.g. "Chose Redis cache over in-memory Map for session storage">**
    - Why: <reason>
    - Alternative considered: <option> — rejected because <reason>
 
@@ -44,12 +45,14 @@ If no pitfalls, write "None for this milestone." Don't omit the section.
 ## 📐 規則合規 / Rule compliance
 - Build 0 error ✓
 - Commit message format ✓
+- Committed to `session/<id>` branch (not main) ✓
 - Didn't touch <other sessions' regions> ✓
 - PROGRESS.md `Mx.y [x]` ✓
 ```
 
 ## Frontmatter fields
 
+- `branch`: the Worker's session branch (e.g. `session/sessionA`). Records which branch the commit was made on before Reviewer merged to main.
 - `status`: tracks the milestone's review lifecycle. Update to `review-pass` after Reviewer signs off.
 - `review`: anchor into Reviewer master log. Format: `[[YYYY-MM-DD#Mx.y-sessionN]]` (Obsidian wikilink with heading anchor). Filled in after review pass.
 - `daily`: link back to this session's daily summary. `[[session-N]]` resolves to the sibling `session-N.md`.

@@ -9,14 +9,15 @@ Copy this block into `send_message` to a Worker when assigning a new milestone.
 ```
 👋 First dispatch in this session. Before touching the milestone below, do this onboarding **once**:
 
-0. Verify your worktree: `pwd` should be `../worker-<your-id>`, `git branch --show-current` should show `session/<your-id>`. If either is wrong, stop and tell me.
+0. Verify your worktree: `pwd` should be `../worker-<your-id>`, `git branch --show-current` should show `worker/<your-id>`. If either is wrong, stop and tell me.
 1. Read .claude-multi-session/roles/worker.md (your job description)
 2. Read .claude-multi-session/workflow.md (state machine)
 3. Read .claude-multi-session/messages/completion-report.md (the format you'll send back)
 4. Read .claude-multi-session/log-templates/atomic.md and .claude-multi-session/log-templates/daily.md (the log artifacts you must produce)
 5. set_summary("Worker <your-id> — working on <project basename>")
+6. Load codebase-memory tools (optional but recommended): use `ToolSearch` to load `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If unavailable, proceed with Glob/Grep/Read — the tools are helpful but not required.
 
-Your worktree is at ../worker-<your-id>, branch session/<your-id>. All commits go to this branch — never commit directly to main.
+Your worktree is at ../worker-<your-id>, branch worker/<your-id>. All commits go to this branch — never commit directly to the session branch or main.
 
 Confirm via send_message back: "✅ Onboarded, starting Mx.y" — then start. The dispatch follows.
 
@@ -42,15 +43,16 @@ Confirm via send_message back: "✅ Onboarded, starting Mx.y" — then start. Th
 - <file / region 1> (sessionM is editing)
 - <file / region 2>
 
-🔒 規則提醒 (rules — non-negotiable, all six required):
+🔒 規則提醒 (rules — non-negotiable, all seven required):
 1. Only do Mx.y; stop and report when done. No scope creep.
 2. Build 0 error required before commit (<build command>).
 3. Commit message format: `Mx.y: <description>`.
-4. Commits go to `session/<your-id>` branch, not main. Verify with `git branch --show-current` before committing.
+4. Commits go to `worker/<your-id>` branch, not the session branch or main. Verify with `git branch --show-current` before committing.
 5. Same commit must include:
    - `PROGRESS.md` checkbox update (Mx.y `[ ] → [x]`) + 「註」 column with implementation notes
    - **Atomic log file** at `docs/session-logs/YYYY-MM-DD/sessionN/Mx.y-sessionN.md` (use template `.claude-multi-session/log-templates/atomic.md`)
 6. Acceptance criteria 含可執行測試（e.g. `npm test`, `curl ...`）→ 測試必須 pass 才能 commit。
+7. Before committing: `git rebase session/<slug>` to ensure your branch is up to date with the session branch.
 
 If you skip the atomic log or PROGRESS.md update, the review will fail and you'll redo the commit. This is enforced — not optional.
 

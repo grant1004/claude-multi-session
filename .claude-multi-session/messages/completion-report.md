@@ -12,7 +12,7 @@ Copy this block when reporting milestone completion via `send_message`.
 4. docs/session-logs/<date>/sessionN/Mx.y-sessionN.md (atomic log)
 
 🎯 實作要點 / Implementation notes:
-- <design decision 1: e.g. "chose DataTrigger + MultiBinding over ListBox because ItemsControl has no selection model">
+- <design decision 1: e.g. "chose Redis cache over in-memory Map because session data must survive process restarts">
 - <design decision 2>
 
 ✅ 驗收條件對照 / Acceptance criteria:
@@ -22,6 +22,7 @@ Copy this block when reporting milestone completion via `send_message`.
 🔍 規則合規 / Rule compliance:
 - Build 0 error ✓
 - Commit message format ✓ (`Mx.y: ...`)
+- Committed to `worker/<id>` branch (not session branch or main) ✓
 - Didn't touch <other sessions' regions> ✓
 - PROGRESS.md updated ✓
 - Atomic log written ✓
@@ -34,7 +35,11 @@ Copy this block when reporting milestone completion via `send_message`.
 (If all four ✓: I'll proceed assuming auto-pass; please send fail message if you disagree.)
 
 🔍 踩坑 / Pitfalls hit (if any):
-- [[wpf-datatrigger-const-value]] — hit this one; updated the pitfall entry with my workaround.
+- [[env-var-shadow]] — hit this one; updated the pitfall entry with my workaround.
+
+📝 Daily summary status:
+- [ ] session-N.md written (if this is my last milestone — Reviewer will block cleanup until this exists)
+- [ ] Not my last milestone — will write at session close
 
 待 review.
 ```
