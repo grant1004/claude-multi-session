@@ -1,6 +1,6 @@
 ---
 skipped: []
-in_progress: []
+in_progress: [M8.1, M8.2, M8.3]
 completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5.2, M6.1, M6.2, M6.3, M6.4, M6.5, M7.1, M7.2]
 ---
 
@@ -8,7 +8,7 @@ completed: [M1.1, M1.2, M2.1, M2.2, M3.1, M3.2, M3.3, M4.1, M4.2, M4.3, M5.1, M5
 
 ## 現在進度
 
-All 19 milestones complete (M1.1–M7.2). Phase 1–4, 3 workers, 9 waves, 0 failures, 0 git conflicts.
+Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 
 ## Audit summary
 
@@ -266,12 +266,125 @@ All 19 milestones complete (M1.1–M7.2). Phase 1–4, 3 workers, 9 waves, 0 fai
 - No dependencies between M7.1 and M7.2 — different files
 - Wave plan: 2 workers in parallel
 
+### M8.1 — workflow.md: rewrite state machine for branch-based lifecycle
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `.claude-multi-session/workflow.md`
+- **Acceptance**:
+  - State machine has new `[Create session branch]` step after `[Reviewer init]`: `git checkout -b session/<YYYY-MM-DD>-<slug> main`
+  - `[Create worktrees]` step creates worker branches from session branch: `git worktree add ../worker-<id> -b worker/<id> session/<slug>`
+  - `[Review]` merge target is session branch (not main): `git checkout session/<slug> && git merge --ff-only worker/<id>`
+  - `[Pre-next rebase]` target is session branch: `git rebase session/<slug>`
+  - New `[Finalize]` step after `[Cleanup]`: `git checkout main && git merge --no-ff session/<slug>` with user confirmation
+  - "Worktree lifecycle" section updated: Setup branches from session branch, Review merges to session branch, Cleanup deletes worker branches + session branch after finalize
+  - Root copy byte-identical to plugin source
+- **Effort**: M
+- **ROI**: high — defines the core model all other files follow
+
+### M8.2 — reviewer.md: update responsibilities for session branch model
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`, `.claude-multi-session/roles/reviewer.md`
+- **Acceptance**:
+  - Setup section: step 4 branch logic includes "create session branch if starting a new session" (after audit creates PROGRESS.md)
+  - Responsibilities: "Create worktrees" uses `git worktree add ../worker-<id> -b worker/<id> session/<slug>`
+  - Responsibilities: "Merge on pass" target is session branch: `git checkout session/<slug> && git merge --ff-only worker/<id>`
+  - New responsibility: "Finalize session" — merge session → main (--no-ff) with user confirmation via AskUserQuestion
+  - Responsibilities: "Clean up worktrees" also deletes session branch after finalize
+  - Root copy byte-identical to plugin source
+- **Effort**: M
+- **ROI**: high — Reviewer is the session lifecycle owner
+
+### M8.3 — worker.md: update rebase target and branch naming
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`, `.claude-multi-session/roles/worker.md`
+- **Acceptance**:
+  - Setup step 0: verify worktree path + branch is `worker/<id>` (not `session/<id>`)
+  - Responsibility "Rebase before each milestone": target is session branch (`git rebase session/<slug>`), not main
+  - Responsibility "Commit to your session branch": changed to "Commit to your worker branch" — `worker/<id>`, never session branch or main
+  - Common mistakes: updated branch references (main → session branch for rebase, session/<id> → worker/<id> for commit)
+  - Root copy byte-identical to plugin source
+- **Effort**: S
+- **ROI**: high — Workers need correct rebase/commit targets
+
+### M8.4 — dispatch.md template + review-pass.md + completion-report.md: update branch references
+- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/messages/dispatch.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/review-pass.md`, `plugins/claude-multi-session/templates/.claude-multi-session/messages/completion-report.md`, `.claude-multi-session/messages/dispatch.md`, `.claude-multi-session/messages/review-pass.md`, `.claude-multi-session/messages/completion-report.md`
+- **Acceptance**:
+  - dispatch.md: onboarding step 0 verifies `worker/<id>` branch (not `session/<id>`). Rule 4 says commits go to `worker/<id>`. Rule 7 rebase target is session branch.
+  - dispatch.md: worktree creation command uses `git worktree add ../worker-<id> -b worker/<id> session/<slug>`
+  - review-pass.md: merge command is `git checkout session/<slug> && git merge --ff-only worker/<id>`
+  - completion-report.md: branch field references `worker/<id>`
+  - All root copies byte-identical to plugin source
+- **Effort**: M
+- **ROI**: high — message templates define what Workers actually see and follow
+
+### M8.5 — audit.md command: add session branch creation
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/audit.md`
+- **Acceptance**:
+  - New step after writing PROGRESS.md (§7) and before "Report and stop" (§8): create session branch `git checkout -b session/<YYYY-MM-DD>-<slug> main` where slug is derived from the audit's project name or user's stated goal (from Grill Q1)
+  - `allowed-tools` includes `Bash(git:*)` (already present) for branch creation
+  - Report (§8) mentions the created session branch name
+  - If session branch already exists (resuming), skip creation and report existing branch
+- **Effort**: S
+- **ROI**: high — entry point for the entire branch-based lifecycle
+
+### M8.6 — dispatch.md command: update generated messages for session branch
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/dispatch.md`
+- **Acceptance**:
+  - Generated onboarding pre-block: worktree verify uses `worker/<id>` branch, worktree created from session branch
+  - Generated rules: rule 4 says `worker/<id>`, rule 7 rebase target is session branch (auto-detected from `git branch --list 'session/*'`)
+  - Step for worktree creation hint uses `git worktree add ../worker-<id> -b worker/<id> session/<slug>`
+  - Auto-detects current session branch name from git state
+- **Effort**: M
+- **ROI**: high — dispatch command generates the actual messages Workers follow
+
+### M8.7 — review.md command: merge to session branch + finalize option
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/review.md`
+- **Acceptance**:
+  - Merge step (§9): target is session branch, not main. `git checkout session/<slug> && git merge --ff-only worker/<id>`
+  - Worker branch detection: looks for `worker/*` branches (not `session/*`)
+  - New step after all milestones done: offer "Finalize session? Merge session → main (--no-ff)" with AskUserQuestion
+  - Post-review actions updated: references session branch
+  - Auto-detects session branch from git state
+- **Effort**: M
+- **ROI**: high — review command handles the merge lifecycle
+
+### M8.8 — self-check.md command: update branch verification
+- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/self-check.md`
+- **Acceptance**:
+  - Step 2 (determine session ID): derives from `worker/<id>` branch (not `session/<id>`)
+  - Step 4 checks: diff target is session branch (not main). `git diff session/<slug>..HEAD`
+  - Commit message check: unchanged
+  - Auto-detects session branch from git state
+- **Effort**: S
+- **ROI**: medium — self-check must use correct diff target
+
+### M8.9 — QUICKSTART.md: update flow for branch-based lifecycle
+- [ ] **Expected files**: `QUICKSTART.md`
+- **Acceptance**:
+  - §7 flow description mentions session branch creation after audit
+  - §7c mentions worker branches are `worker/<id>`, branched from session branch
+  - Mentions final merge: session → main (--no-ff) after all milestones pass
+  - No duplicate paragraphs introduced
+- **Effort**: S
+- **ROI**: medium — onboarding doc must match actual workflow
+
+## Phase 5 parallelism analysis
+
+- Source: branch-based lifecycle architectural change (2026-05-27)
+- Design: session branch (`session/<YYYY-MM-DD>-<slug>`) + worker sub-branches (`worker/<id>`) + finalize merge (--no-ff)
+- Sequencing constraints:
+  - Wave 1 defines the model (workflow.md, reviewer.md, worker.md) — no inter-dependencies, different files
+  - Wave 2 (templates + audit command) benefits from Wave 1 being merged but files are independent
+  - Wave 3 (commands + QUICKSTART) benefits from Wave 2 templates being merged but files are independent
+- Wave plan (3 workers):
+  - **Wave 1**: M8.1 + M8.2 + M8.3 (core model, M+M+S)
+  - **Wave 2**: M8.4 + M8.5 + M8.9 (templates + audit + QUICKSTART, M+S+S)
+  - **Wave 3**: M8.6 + M8.7 + M8.8 (commands, M+M+S)
+- **Recommendation**: 3 workers, 3 waves
+
 ## 待用戶決定 / Pending user decision
 
 (None.)
 
 ## 設計決策變更紀錄 / Decision changelog
 
+- 2026-05-27: Phase 5 — branch-based lifecycle. Session branch `session/<date>-<slug>` from main, worker sub-branches `worker/<id>` from session branch. Reviewer merges workers → session (--ff-only). Final merge session → main (--no-ff). User confirmed Session + worker sub-branches model over single-branch alternatives.
 - 2026-05-27: Phase 4 milestones added — re-review residual fixes (M7.1–M7.2).
 - 2026-05-27: Phase 3 milestones added — documentation cross-consistency fixes (M6.1–M6.5). Source: automated cross-audit of all md files.
 - 2026-05-27: Phase 2 milestones added — codebase-memory integration across workflow (M4.1–M5.2). Driven by ADR-001 §3 gap: codebase-memory was only in audit.md, not in Worker/Reviewer daily workflow.
