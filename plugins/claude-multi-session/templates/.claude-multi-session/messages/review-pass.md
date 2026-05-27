@@ -45,12 +45,12 @@ Standby for now; I'll dispatch again in ~<duration> or when blocker clears.
 
 ## After-pass actions for the Reviewer
 
-1. **Merge the Worker's branch into main:**
+1. **Merge the Worker's branch into the session branch:**
    ```bash
-   git checkout main
-   git merge --ff-only session/<id>
+   git checkout session/<slug>
+   git merge --ff-only worker/<id>
    ```
-   If `--ff-only` fails, ask the Worker to rebase onto main first (`git rebase main`), then re-merge.
+   If `--ff-only` fails, ask the Worker to rebase onto the session branch first (`git rebase session/<slug>`), then re-merge.
 2. Update `docs/review-logs/YYYY-MM-DD.md`:
    - Add row to "Review pass 一覽" table (milestone | session | commit | round | atomic log wikilink)
    - Add `## Mx.y-sessionN` heading section with: 「做了什麼 / 如何驗證 / 評語」
@@ -62,7 +62,7 @@ Standby for now; I'll dispatch again in ~<duration> or when blocker clears.
 
 ```bash
 git worktree remove ../worker-<id>
-git branch -d session/<id>
+git branch -d worker/<id>
 ```
 
 Use `git worktree list` to audit for leftover worktrees from crashed sessions.

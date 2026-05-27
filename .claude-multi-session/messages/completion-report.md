@@ -22,6 +22,7 @@ Copy this block when reporting milestone completion via `send_message`.
 🔍 規則合規 / Rule compliance:
 - Build 0 error ✓
 - Commit message format ✓ (`Mx.y: ...`)
+- Committed to `worker/<id>` branch (not session branch or main) ✓
 - Didn't touch <other sessions' regions> ✓
 - PROGRESS.md updated ✓
 - Atomic log written ✓
