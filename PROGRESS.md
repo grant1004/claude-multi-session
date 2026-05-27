@@ -267,7 +267,7 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - Wave plan: 2 workers in parallel
 
 ### M8.1 — workflow.md: rewrite state machine for branch-based lifecycle
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `.claude-multi-session/workflow.md`
+- [x] <!-- sessionA --> 「註」Full rewrite: added Branch model section with ASCII diagram, state machine now has [Create session branch] + [Finalize] steps, all merge/rebase targets changed from main to session/<slug>, worktree lifecycle has 5 subsections (added Finalize), pitfalls table has 2 new entries (rebase from main, finalize without confirmation). Root copy byte-identical. **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`, `.claude-multi-session/workflow.md`
 - **Acceptance**:
   - State machine has new `[Create session branch]` step after `[Reviewer init]`: `git checkout -b session/<YYYY-MM-DD>-<slug> main`
   - `[Create worktrees]` step creates worker branches from session branch: `git worktree add ../worker-<id> -b worker/<id> session/<slug>`

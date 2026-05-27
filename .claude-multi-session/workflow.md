@@ -4,6 +4,25 @@ This document describes how N Claude Code sessions cooperate on a single repo: o
 
 Communication channel: [`louislva/claude-peers-mcp`](https://github.com/louislva/claude-peers-mcp) — `list_peers` / `set_summary` / `send_message`.
 
+## Branch model
+
+```
+main ─────────────────────────────────────────────── ● (--no-ff merge)
+  │                                                  ↑
+  └─ session/<YYYY-MM-DD>-<slug> ──●──●──●──●───────┘
+       │         │         │
+       ├─ worker/A ──●──●  │
+       │  (--ff-only) ↑    │
+       ├─ worker/B ──●─────┘
+       │  (--ff-only) ↑
+       └─ worker/C ──●
+          (--ff-only) ↑
+```
+
+- **`main`**: untouched during the entire multi-session run. No direct commits.
+- **`session/<YYYY-MM-DD>-<slug>`**: created by the Reviewer (via audit) from `main`. All Worker milestones accumulate here via `--ff-only` merges. Merged back to `main` with `--no-ff` when the session concludes.
+- **`worker/<id>`**: one per Worker, branched from the session branch. Workers commit here; Reviewer merges to session branch after review pass.
+
 ## Roles at a glance
 
 | Role | Writes code? | Maintains `PROGRESS.md`? | Reads | Writes log | Code exploration |
@@ -19,44 +38,51 @@ Full job descriptions: `roles/reviewer.md`, `roles/worker.md`, `roles/project-ma
 ## State machine
 
 ```
-[Reviewer init]   set_summary "Reviewer, dispatch + review"
-                       │
-[List peers]       list_peers → find sessionA / sessionB / sessionC ...
-                       │
-[Create worktrees] git worktree add ../worker-<id> -b session/<id> main
-                   (one worktree + branch per Worker, before first dispatch)
-                       │
-[Onboard]          send_message to each → "read CLAUDE.md + PROGRESS.md → set_summary"
-                   (include worktree path in first message)
-                       │
-[Workers ack]      each worker send_message back → ready + lists candidate milestones
-                   (worker verifies: pwd = ../worker-<id>, branch = session/<id>)
-                       │
-[Dispatch wave 1]  Reviewer cross-checks file-region overlap → parallel dispatch
-                   (one milestone each, with explicit "don't touch X/Y/Z" list)
-                       │
-[Execute]          worker writes code in own worktree → build 0 error
-                   → commit to session/<id> branch → send_message done
-                       │
-[Review]           Reviewer reads `git log main..session/<id> --stat` + `git diff`
-                   → pass: git checkout main && git merge --ff-only session/<id>
-                   → fail: send_message with fail reason, worker fixes on same branch
-                       │
-[Pre-next rebase]  worker runs `git rebase main` to pick up merged work
-                       │
-[Dispatch wave 2]  next milestone for each worker (or hold / standby)
-                   ... loop ...
-                       │
-[Wrap up]          all milestones done → Reviewer sends "write daily summary" to each Worker
-                   Reviewer writes review-logs/YYYY-MM-DD.md + updates PROGRESS.md
-                       │
-[Verify logs]      Reviewer checks: does session-N.md exist for each Worker?
-                   → yes: proceed to cleanup
-                   → no: send_message Worker "missing daily summary, write it before I close your session"
-                   (GATE: do NOT proceed to cleanup until all daily summaries exist)
-                       │
-[Cleanup]          git worktree remove ../worker-<id> && git branch -d session/<id>
-                   (Reviewer runs for each Worker after session close)
+[Reviewer init]       set_summary "Reviewer, dispatch + review"
+                           │
+[Create session branch] git checkout -b session/<YYYY-MM-DD>-<slug> main
+                        (one session branch per multi-session run; created by audit)
+                           │
+[List peers]           list_peers → find sessionA / sessionB / sessionC ...
+                           │
+[Create worktrees]     git worktree add ../worker-<id> -b worker/<id> session/<slug>
+                       (one worktree + branch per Worker, branched from session)
+                           │
+[Onboard]              send_message to each → "read CLAUDE.md + PROGRESS.md → set_summary"
+                       (include worktree path in first message)
+                           │
+[Workers ack]          each worker send_message back → ready + lists candidate milestones
+                       (worker verifies: pwd = ../worker-<id>, branch = worker/<id>)
+                           │
+[Dispatch wave 1]      Reviewer cross-checks file-region overlap → parallel dispatch
+                       (one milestone each, with explicit "don't touch X/Y/Z" list)
+                           │
+[Execute]              worker writes code in own worktree → build 0 error
+                       → commit to worker/<id> branch → send_message done
+                           │
+[Review]               Reviewer reads `git log session/<slug>..worker/<id> --stat` + `git diff`
+                       → pass: git checkout session/<slug> && git merge --ff-only worker/<id>
+                       → fail: send_message with fail reason, worker fixes on same branch
+                           │
+[Pre-next rebase]      worker runs `git rebase session/<slug>` to pick up merged work
+                           │
+[Dispatch wave 2]      next milestone for each worker (or hold / standby)
+                       ... loop ...
+                           │
+[Wrap up]              all milestones done → Reviewer sends "write daily summary" to each Worker
+                       Reviewer writes review-logs/YYYY-MM-DD.md + updates PROGRESS.md
+                           │
+[Verify logs]          Reviewer checks: does session-N.md exist for each Worker?
+                       → yes: proceed to cleanup
+                       → no: send_message Worker "missing daily summary, write it before I close your session"
+                       (GATE: do NOT proceed to cleanup until all daily summaries exist)
+                           │
+[Cleanup]              git worktree remove ../worker-<id> && git branch -d worker/<id>
+                       (Reviewer runs for each Worker after session close)
+                           │
+[Finalize]             git checkout main && git merge --no-ff session/<slug>
+                       (user confirms — creates merge commit preserving session history)
+                       git branch -d session/<slug>
 ```
 
 ## File-region partitioning rule
@@ -76,38 +102,55 @@ Each Worker operates in an isolated git worktree on a dedicated branch. This eli
 ### Setup (Reviewer, before first dispatch)
 
 ```bash
-git worktree add ../worker-<id> -b session/<id> main
+# 1. Create the session branch (once per multi-session run)
+git checkout -b session/<YYYY-MM-DD>-<slug> main
+
+# 2. Create one worktree + worker branch per Worker
+git worktree add ../worker-<id> -b worker/<id> session/<slug>
 ```
 
 This creates:
+- A session branch `session/<YYYY-MM-DD>-<slug>` from `main` (all milestones accumulate here)
 - A worktree directory at `../worker-<id>` (sibling to the main repo)
-- A branch `session/<id>` tracking from `main`
+- A worker branch `worker/<id>` branched from the session branch
 
 The Reviewer includes the worktree path in the first dispatch message so the Worker knows where to `cd`.
 
 ### Execution (Worker, per milestone)
 
-1. **Pre-milestone rebase:** `git fetch origin && git rebase main` — pick up other Workers' merged work before starting.
-2. **Work + commit:** Write code, build, commit to `session/<id>`. Commits never go directly to `main`.
+1. **Pre-milestone rebase:** `git rebase session/<slug>` — pick up other Workers' merged work from the session branch before starting.
+2. **Work + commit:** Write code, build, commit to `worker/<id>`. Commits never go directly to the session branch or `main`.
 3. **Completion report:** `send_message` Reviewer with commit hash.
 
 ### Review + merge (Reviewer, per milestone)
 
 ```bash
-git checkout main
-git merge --ff-only session/<id>
+git checkout session/<slug>
+git merge --ff-only worker/<id>
 ```
 
-`--ff-only` enforces linear history — if the merge cannot fast-forward (Worker forgot to rebase), it fails loudly rather than creating a merge commit. Reviewer asks Worker to rebase and re-report.
+`--ff-only` enforces linear history on the session branch — if the merge cannot fast-forward (Worker forgot to rebase), it fails loudly rather than creating a merge commit. Reviewer asks Worker to rebase and re-report.
 
 ### Cleanup (Reviewer, after session close)
 
 ```bash
 git worktree remove ../worker-<id>
-git branch -d session/<id>
+git branch -d worker/<id>
 ```
 
-Use `git worktree list` to audit for leftover worktrees from crashed sessions.
+Use `git worktree list` to audit for leftover worktrees from crashed sessions. Worker branches are deleted after cleanup; the session branch remains until finalize.
+
+### Finalize (Reviewer, after all milestones)
+
+```bash
+git checkout main
+git merge --no-ff session/<slug>
+git branch -d session/<slug>
+```
+
+`--no-ff` creates a merge commit that preserves the session's commit history as a group. The user must confirm before this step — it is the only point where `main` is modified during the entire multi-session workflow.
+
+After finalize, the session branch is deleted. All milestone commits are reachable from `main` via the merge commit.
 
 ## Design-decision skip-list
 
@@ -145,7 +188,7 @@ With worktree isolation, each Worker edits `PROGRESS.md` in their own worktree �
 - **Worker checkbox + 「註」** — each Worker only edits the row(s) for their own milestone. The dispatch message must make ownership clear.
 - **Skip-list / Decision changelog** — Reviewer-only.
 
-The Reviewer's `git merge --ff-only` integrates each Worker's `PROGRESS.md` edits into main one at a time, so conflicts surface at merge time (fixable) rather than silently corrupting data.
+The Reviewer's `git merge --ff-only` integrates each Worker's `PROGRESS.md` edits into the session branch one at a time, so conflicts surface at merge time (fixable) rather than silently corrupting data.
 
 ## Standard pitfalls (and what to do)
 
@@ -158,6 +201,8 @@ The Reviewer's `git merge --ff-only` integrates each Worker's `PROGRESS.md` edit
 | Reviewer role not understood at session start | Reviewer reads `roles/reviewer.md` and explicitly states role via `set_summary` |
 | Message delay (peer message lost or late) | Workers commit before sending; Reviewer fallback via `git log --stat` if message doesn't arrive |
 | Reviewer bottleneck (3+ workers) | Bake auto-pass criteria into dispatch (build 0 error + file scope match + commit-message format) — Worker can self-verify before pinging Reviewer |
+| Worker rebases from main instead of session branch | Worker must rebase from `session/<slug>`, not `main`. `main` is untouched until finalize |
+| Finalize without user confirmation | `--no-ff` merge to main requires explicit user confirmation — never auto-merge |
 
 See `log-templates/pitfall.md` for the structure of permanent pitfall entries.
 
