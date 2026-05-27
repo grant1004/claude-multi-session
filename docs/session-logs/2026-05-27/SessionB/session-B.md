@@ -2,7 +2,7 @@
 title: SessionB — 2026-05-27 work summary
 session: SessionB
 date: 2026-05-27
-milestones: [M4.2, M5.2, M6.5, M6.4, M7.2]
+milestones: [M4.2, M5.2, M6.5, M6.4, M7.2, M8.2, M8.9, M8.7]
 status: closed
 handoff-to: any-worker
 ---
@@ -27,14 +27,18 @@ handoff-to: any-worker
 - [[M6.5-SessionB]] — README.md + CHANGELOG.md: fix minor reference errors (`85f9ca2`)
 - [[M6.4-SessionB]] — review command: align post-review steps with template (`3e5fb43`)
 - [[M7.2-SessionB]] — dispatch template: sync rule 7 (rebase) from command (`036ea16`)
+- [[M8.2-SessionB]] — reviewer.md: update responsibilities for session branch model (`b024180`)
+- [[M8.9-SessionB]] — QUICKSTART.md: update flow for branch-based lifecycle (`bc115b5`)
+- [[M8.7-SessionB]] — review command: merge to session branch + finalize option (`3f26489`)
 
 ## ⛔ 絕對不能動 / Absolute don't-touch (discovered this session)
 
-- **Root `.claude-multi-session/` templates must stay byte-identical to plugin source** — the CI workflow (`validate.yml`) enforces `diff -r` between root and plugin source. If you edit a template under `plugins/claude-multi-session/templates/`, you must copy the result to the root `.claude-multi-session/` counterpart. SessionB touched root copies for `workflow.md` (M4.2) and `messages/dispatch.md` (M7.2) — both verified byte-identical.
+- **Root `.claude-multi-session/` templates must stay byte-identical to plugin source** — the CI workflow (`validate.yml`) enforces `diff -r` between root and plugin source. If you edit a template under `plugins/claude-multi-session/templates/`, you must copy the result to the root `.claude-multi-session/` counterpart. SessionB touched root copies for `workflow.md` (M4.2), `messages/dispatch.md` (M7.2), and `roles/reviewer.md` (M8.2) — all verified byte-identical.
+- **Branch naming convention changed in Phase 5** — worker branches are now `worker/<id>` (not `session/<id>`), cut from `session/<slug>` (not from `main`). All template/command/doc references updated across M8.x milestones. Do not revert to old `session/<id>` naming.
 
 ## ✅ 一定要做 / Must-do (environment preparation accumulated this session)
 
-- Before editing `review.md`: it has been modified in 2 milestones this session (M5.2 + M6.4). Check `git log -p plugins/claude-multi-session/commands/multi-session/review.md | head -200` for recent context. The file now has 10 steps (was 9 at start of session) and codebase-memory integration.
+- Before editing `review.md`: it has been modified in 3 milestones this session (M5.2 + M6.4 + M8.7). The file now has 10 steps with codebase-memory integration (step 2), session branch auto-detection (step 1), and finalize option (step 9). All git references use `<session-branch>..<worker-branch>` (not `main..`).
 - Before editing `workflow.md` or `messages/dispatch.md`: verify root copy is still byte-identical to plugin source (`diff plugins/.../<file> .claude-multi-session/<file>`). If editing, update both copies.
 - Before editing any template file: run `bash tests/validate-templates.sh` after your changes to catch structural regressions.
 - Before editing dispatch template: note that it now has 7 rules (not 6). Header says "all seven required". Rule 7 is `git rebase main`.
@@ -42,10 +46,10 @@ handoff-to: any-worker
 ## 🔥 熱檔 / Hot files & sub-products status
 
 ### `plugins/claude-multi-session/commands/multi-session/review.md`
-- **State now:** 10-step review flow (was 9 steps at session start). Steps: 1-preflight → 2-load-codebase-memory → 3-select-milestone → 4-read-criteria → 5-read-diff+impact-analysis → 6-compare-criteria+get_code_snippet → 7-recommend-verdict → 8-generate-message → 9-offer-merge → 10-stop
-- **Pattern asymmetry:** codebase-memory tools are loaded eagerly in step 2 but used lazily in steps 5 and 6 (only if available). All steps work without codebase-memory — two-tier, never three-tier.
-- **Post-review actions (step 9):** now 5 steps aligned with review-pass.md template: send verdict → review-logs → atomic log status → PROGRESS.md → dispatch next
-- **`allowed-tools`:** `Read, Bash(git:*), AskUserQuestion, mcp__claude-peers__list_peers, ToolSearch, mcp__codebase-memory-mcp__trace_path, mcp__codebase-memory-mcp__search_graph, mcp__codebase-memory-mcp__get_code_snippet`
+- **State now:** 10-step review flow. Steps: 1-preflight+session-branch-detect → 2-load-codebase-memory → 3-select-milestone(worker/*) → 4-read-criteria → 5-read-diff(session..worker)+impact-analysis → 6-compare-criteria+get_code_snippet → 7-recommend-verdict → 8-generate-message → 9-offer-merge+finalize → 10-stop
+- **Session branch model (M8.7):** step 1 auto-detects session branch; step 3 finds `worker/*` branches; step 5/9 diffs/merges against session branch; step 9 offers finalize (`--no-ff` session→main) when all milestones complete
+- **Pattern asymmetry:** codebase-memory tools loaded eagerly (step 2), used lazily (steps 5/6). Two-tier, never three-tier.
+- **Post-review actions (step 9):** 5 steps + conditional post-finalize cleanup block
 
 ### `plugins/claude-multi-session/templates/.claude-multi-session/workflow.md`
 - **State now:** "Roles at a glance" table has 6 columns (added "Code exploration"). Tooling-note paragraph after table explains codebase-memory try→fallback pattern. References audit.md §4a for three-tier logic.
@@ -59,16 +63,24 @@ handoff-to: any-worker
 - **Root copy:** byte-identical (verified via `diff`)
 - **Sync note:** dispatch command (`commands/multi-session/dispatch.md`) already had 7 rules after M6.3 (SessionA). M7.2 synced the template to match.
 
+### `plugins/claude-multi-session/templates/.claude-multi-session/roles/reviewer.md`
+- **State now (M8.2):** Setup step 4 references session branch lifecycle. Responsibilities: worktrees from session branch (`worker/<id>`), merge to session branch (--ff-only), new "Finalize session" (--no-ff session→main + AskUserQuestion). Cleanup deletes worker branches then session branch.
+- **Root copy:** byte-identical
+
+### `QUICKSTART.md`
+- **State now (M8.9):** §7a mentions audit creates session branch. §7b mentions Workers get `worker/<id>` branches. §7c flow references session branch merge. New §7d: finalize session→main (--no-ff).
+
 ### `CHANGELOG.md`
 - **State now:** QUICKSTART step count corrected to "steps 1-9"
 
 ## 🌊 工作流程觀察 / Workflow observations (cross-milestone)
 
-1. **Five milestones across four phases (Phase 2, 3, 3→4, 4) in one session** — the Reviewer's wave dispatching kept me continuously productive. No idle time between milestones; review pass + next dispatch came within 2–3 minutes each time. Session was closed and worktree removed after M6.4, then re-created for M7.2 — seamless.
-2. **Two milestones on the same file (review.md: M5.2 + M6.4) worked well** — M5.2 added codebase-memory integration (structural change: new step + renumbering), M6.4 was a targeted fix to the post-review actions list. No conflicts because M6.4 was dispatched after M5.2's review pass.
-3. **Template-command drift is a recurring pattern** — M7.2 exists because M6.3 added rule 7 to the dispatch command but didn't sync the template. This is the same class of issue Phase 3 was created to fix. Future workflow improvement: dispatch command could auto-check template consistency.
-4. **Small milestones (S effort) like M6.5 and M7.2 take ~3 minutes end-to-end** — the overhead of atomic log + PROGRESS.md update + completion report is proportionally high for tiny fixes, but the audit trail is worth it for traceability.
-5. **Rebasing was always a no-op ("up to date")** — indicates the Reviewer merged my work before dispatching the next milestone, which is correct workflow but also means my branch never had to resolve conflicts from other Workers' merged work.
+1. **Eight milestones across five phases (Phase 2, 3, 4, 4→5, 5) in one long-lived session** — the Reviewer's wave dispatching kept me continuously productive. Session was closed and re-created twice (after M6.4 for M7.2, after M7.2 for M8.x) — seamless each time.
+2. **Three milestones on the same file (review.md: M5.2 + M6.4 + M8.7)** — M5.2 added codebase-memory, M6.4 aligned post-review steps, M8.7 updated merge lifecycle for session branches. No conflicts because each was dispatched after the previous one's review pass.
+3. **Phase 5 (session branch model) required coordinated changes across 3 Workers** — M8.1 (workflow.md, SessionA), M8.2 (reviewer.md, SessionB), M8.3 (worker.md, SessionC) all had to use the same branch naming convention. The design spec in the dispatch message was the coordination mechanism — all Workers received identical branch naming rules.
+4. **Template-command drift is a recurring pattern** — M7.2 was needed because M6.3 didn't sync the template. Phase 5 may introduce new drift if commands reference old branch names.
+5. **Small milestones (S effort) like M6.5, M7.2, M8.9 take ~3 minutes end-to-end** — proportionally high overhead for atomic log + completion report, but audit trail is worth it.
+6. **Rebasing was always a no-op or trivial** — Reviewer merged before dispatching next milestone, preventing conflicts.
 
 ## 🚫 未完成 / 範圍外 / Out of scope
 
