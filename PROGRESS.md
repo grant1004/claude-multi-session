@@ -348,7 +348,8 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: high — review command handles the merge lifecycle
 
 ### M8.8 — self-check.md command: update branch verification
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/self-check.md`
+- [x] <!-- SessionC --> 「註」3 edits: (1) step 2 branch pattern `session/<id>` → `worker/<id>` + added session branch auto-detection with `git branch --list 'session/*'` and fallback to main, (2) step 4 post-commit diff target `main..HEAD` → `<session-branch>..HEAD`, (3) step 2 title updated to "Determine session ID and session branch".
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/self-check.md`
 - **Acceptance**:
   - Step 2 (determine session ID): derives from `worker/<id>` branch (not `session/<id>`)
   - Step 4 checks: diff target is session branch (not main). `git diff session/<slug>..HEAD`

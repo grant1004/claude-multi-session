@@ -25,12 +25,17 @@ The milestone ID can come from:
 
 If the milestone ID cannot be determined, ask: "Which milestone are you checking? (e.g. M3.1)" and stop until the user answers.
 
-### 2. Determine session ID
+### 2. Determine session ID and session branch
 
 Derive your session ID from:
-- Branch name: `session/<sessionId>` → extract `<sessionId>`
-- If branch doesn't match `session/*` pattern, fall back to worktree directory name (e.g. `worker-sessionA` → `sessionA`)
+- Branch name: `worker/<id>` → extract `<id>`
+- If branch doesn't match `worker/*` pattern, fall back to worktree directory name (e.g. `worker-sessionA` → `sessionA`)
 - If neither works, use "unknown" and note this in the output
+
+Detect the session branch (used as diff target in step 4):
+- Run `git branch --list 'session/*'` — if exactly one result, use it
+- If multiple session branches exist, pick the one that is an ancestor of HEAD (`git merge-base --is-ancestor`)
+- If no session branch found, fall back to `main` and report ⚠️ "no session branch detected, using main as diff target"
 
 ### 3. Read PROGRESS.md
 
@@ -49,7 +54,7 @@ Perform these 4 checks. Each check produces ✅ (pass) or ❌ (fail) with detail
 Compare actual changes against expected files:
 
 - **Pre-commit** (changes staged but not committed): use `git diff --cached --stat` + `git diff --stat` (staged + unstaged)
-- **Post-commit** (milestone already committed): use `git diff --stat HEAD~1` or `git diff --stat main..HEAD`
+- **Post-commit** (milestone already committed): use `git diff --stat HEAD~1` or `git diff --stat <session-branch>..HEAD` (where `<session-branch>` is the branch detected in step 2)
 
 **Pass criteria**: every changed file (excluding PROGRESS.md and `docs/session-logs/`) appears in the expected files list. No unexpected files changed.
 
