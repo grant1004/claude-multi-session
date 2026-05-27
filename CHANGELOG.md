@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `/multi-session:upgrade` command — diff live `.claude-multi-session/` against plugin source, apply updates with user confirmation (apply all / review each / cancel)
+- `/multi-session:dispatch` command — Reviewer dispatch helper with automatic file-region conflict detection, "don't touch" list auto-generation, first-dispatch heuristic, and pre-filled dispatch message output
+- `/multi-session:self-check` command — Worker pre-commit validation of auto-pass criteria (file scope, commit message format, PROGRESS.md checkbox, atomic log existence) with pre/post-commit auto-detection
+- `/multi-session:review` command — Reviewer review helper: reads git diff, compares per-criterion against acceptance criteria with evidence linking, generates review verdict message, optional `git merge --ff-only` on pass
+- `tests/validate-templates.sh` — template structure validation script (6 checks, 27 assertions): command frontmatter, init.md copy-list, WPF regression guard, role headings, message code blocks, log-template frontmatter
+- `.github/workflows/validate.yml` — CI workflow running template validation + root-vs-source drift guard on push to main and PRs
+
+### Changed
+
+- **BREAKING**: Branch-based session lifecycle. Audit now creates a `session/<YYYY-MM-DD>-<slug>` branch from main. Workers operate on `worker/<id>` sub-branches (was `session/<id>` from main). Reviewer merges workers → session branch (--ff-only). Session → main (--no-ff) at finalize. Main is never directly committed to during a multi-session workflow.
+- All templates, commands, and docs updated for branch-based model: workflow.md state machine + ASCII diagram, reviewer.md responsibilities + finalize step, worker.md rebase/commit targets, dispatch/review-pass/completion-report templates, audit/dispatch/review/self-check commands, QUICKSTART.md flow
+- codebase-memory MCP integrated across all workflow phases: `worker.md` setup + responsibilities (two-tier: try → fallback), `workflow.md` roles table with "Code exploration" column + tooling note, `dispatch.md` template onboarding step 6, dispatch command (hidden dependency detection via `trace_path`, enriched hints via `search_graph`), review command (impact radius analysis via `trace_path`, criterion evaluation via `get_code_snippet`)
+- `reviewer.md` setup flow now branches on project state: no PROGRESS.md → audit, uncompleted milestones → resume, all completed → ask user for next phase or close out. Also distinguishes new vs returning Workers in onboarding step.
+- Added daily summary enforcement gate: Reviewer must verify `session-N.md` exists before worktree cleanup. `workflow.md` state machine now has `[Verify logs]` step between `[Wrap up]` and `[Cleanup]`. `completion-report.md` includes daily summary status field. `worker.md` marks daily summary as ENFORCED with warning that Reviewer blocks cleanup.
+- Synced root `.claude-multi-session/` templates to match v0.2.0 plugin source (10 files updated, resolving v0.1.0 drift)
+
+### Fixed
+
+- dispatch command now generates messages matching `dispatch.md` template: rule 6 (acceptance criteria tests), onboarding step 6 (codebase-memory), auto-pass criteria section for 🤖-marked milestones
+- review command post-review actions aligned with `review-pass.md` template order (5 steps, added "dispatch next" step)
+- `roll-call.md` stale claim that no dispatch command exists — rewritten to reference `/multi-session:dispatch`
+- `daily.md` broken wikilink `[[progress-md-race-condition]]` → `[[progress-md-race]]`; removed reference to nonexistent PROGRESS.md "卡關紀錄" section
+- `README.md` scripts path corrected; `CHANGELOG.md` QUICKSTART step count corrected
+- `QUICKSTART.md` §7c duplicate "From there the Reviewer drives" paragraph merged; added `/multi-session:dispatch` mention
+- `dispatch.md` template synced rule 7 (rebase main) from dispatch command; header updated "all six" → "all seven required"
+
 ## [0.2.0] - 2026-05-26
 
 ### Added
@@ -35,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial plugin scaffolding: manifest, MIT license, README, `/multi-session:init` command
 - Role definitions (Reviewer, Worker, Project Manager), message templates (dispatch, completion-report, review-pass), log templates (atomic, daily, reviewer-master, pitfall), and workflow state machine
-- QUICKSTART.md — zero-baseline Windows setup guide (steps 1-8)
+- QUICKSTART.md — zero-baseline Windows setup guide (steps 1-9)
 - `claude-peers.ps1` PowerShell launcher script with `-id` flag and env var passthrough
 - `.claude-plugin/marketplace.json` for `/plugin marketplace add` resolution
 - `/multi-session:audit` and `/multi-session:roll-call` slash commands

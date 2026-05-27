@@ -274,7 +274,7 @@ Inside Claude Code:
 /multi-session:audit
 ```
 
-This (a) primes the Reviewer with role context, (b) walks the project, and (c) produces `PROGRESS.md` with milestone candidates + a recommended worker count. Review the output and decide how many workers to spin up.
+This (a) primes the Reviewer with role context, (b) walks the project, (c) produces `PROGRESS.md` with milestone candidates + a recommended worker count, and (d) creates a **session branch** (`session/<YYYY-MM-DD>-<slug>`) from main. All multi-session work happens on this session branch — main stays untouched until finalization. Review the output and decide how many workers to spin up.
 
 ### 7b. Worker terminals (one per parallel worker)
 
@@ -289,7 +289,7 @@ Then inside that Claude Code, just say:
 
 > Standing by. Waiting for the Reviewer to dispatch.
 
-No manual file reads needed — the Reviewer's first dispatch will include the onboarding pre-block. Repeat for `sessionB`, `sessionC`, etc. up to the recommended count.
+No manual file reads needed — the Reviewer's first dispatch will include the onboarding pre-block and will create each Worker's worktree on a `worker/<id>` branch cut from the session branch. Repeat for `sessionB`, `sessionC`, etc. up to the recommended count.
 
 ### 7c. Back in the Reviewer terminal — roll-call + dispatch
 
@@ -297,11 +297,20 @@ No manual file reads needed — the Reviewer's first dispatch will include the o
 /multi-session:roll-call
 ```
 
-This broadcasts an introduction to each worker peer, collects acks, and prints a roster. After the roster is complete, decide which milestones go to which worker (based on the audit's parallelism analysis) and dispatch each manually via `send_message` using the `dispatch.md` template — including the first-dispatch pre-block for each worker on their first task.
+This broadcasts an introduction to each worker peer, collects acks, and prints a roster. After the roster is complete, decide which milestones go to which worker (based on the audit's parallelism analysis) and dispatch each via `send_message`. Use `/multi-session:dispatch` to auto-generate the dispatch message with file-region conflict checks and "don't touch" lists — review and edit the generated message before sending. Include the first-dispatch pre-block for each worker on their first task.
 
-From there the Reviewer drives: dispatch → Worker executes → Worker `send_message` completion-report → Reviewer reviews via `git log --stat` + `git diff` → pass or fail → next dispatch.
+From there the Reviewer drives: dispatch → Worker executes on `worker/<id>` branch → Worker `send_message` completion-report → Reviewer reviews via `git log --stat` + `git diff` → pass: merge `worker/<id>` into session branch (`--ff-only`) → next dispatch. Workers rebase on the session branch (not main) before each milestone.
 
-From there, the Reviewer drives. It dispatches via `send_message`; Workers execute one milestone each, commit, and report.
+### 7d. Finalize — merge session to main
+
+After all milestones are complete and daily summaries verified, the Reviewer finalizes the session:
+
+```sh
+git checkout main
+git merge --no-ff session/<slug>
+```
+
+The `--no-ff` flag preserves a merge commit that marks the session boundary on main's history. The Reviewer will ask for your confirmation before executing this merge. After finalization, the session branch and all worker branches are deleted.
 
 ## 8. Troubleshooting
 
