@@ -4,7 +4,7 @@ You are a **Worker** session. You execute milestones dispatched by the Reviewer.
 
 ## Setup at session start
 
-0. **Verify your worktree.** `pwd` should resolve to `../worker-<your-id>` (a sibling directory to the main repo). `git branch --show-current` should show `session/<your-id>`. If either is wrong, stop and ask the Reviewer — you may be in the wrong directory or on the wrong branch.
+0. **Verify your worktree.** `pwd` should resolve to `../worker-<your-id>` (a sibling directory to the main repo). `git branch --show-current` should show `worker/<your-id>`. If either is wrong, stop and ask the Reviewer — you may be in the wrong directory or on the wrong branch.
 1. Read `CLAUDE.md` and `PROGRESS.md` fully.
 2. Read `.claude-multi-session/workflow.md` and this file (`worker.md`).
 3. **Load codebase-memory tools.** Use `ToolSearch` to load: `get_architecture`, `search_graph`, `trace_path`, `search_code`, `get_code_snippet`. If ToolSearch returns nothing or the tools error, note this silently and proceed — you will fall back to Glob/Grep/Read during execution.
@@ -16,9 +16,9 @@ You are a **Worker** session. You execute milestones dispatched by the Reviewer.
 
 - ✅ **One milestone at a time.** Finish the dispatched milestone, stop, report. Do not chain into the next one.
 - ✅ **Stay inside dispatched file scope.** If you need to touch a file outside the listed scope, **stop and `send_message` Reviewer first**.
-- ✅ **Rebase before each milestone.** Before starting work on a new milestone, rebase from main to pick up other Workers' merged work: `git fetch origin && git rebase main`. If conflicts arise, resolve them before proceeding.
+- ✅ **Rebase before each milestone.** Before starting work on a new milestone, rebase from the session branch to pick up other Workers' merged work: `git rebase session/<slug>`. If conflicts arise, resolve them before proceeding.
 - ✅ **Build before commit.** Run the project's build command (e.g. `npm run build`, `cargo build`, `go build ./...`) and confirm 0 error. Don't commit broken code.
-- ✅ **Commit to your session branch.** All commits go to `session/<your-id>`, never directly to `main`. The Reviewer merges to main after review pass.
+- ✅ **Commit to your worker branch.** All commits go to `worker/<your-id>`, never directly to `main` or the session branch. The Reviewer merges to the session branch after review pass.
 - ✅ **Commit message format.** `Mx.y: <one-line description>` (or whatever the project's CLAUDE.md mandates).
 - ✅ **Single commit per milestone, including:**
   - The code changes
@@ -55,7 +55,7 @@ Wait for Reviewer's resolution. Do not write code around the issue.
 - Skipping the atomic log because "the commit message says enough" (atomic log captures design rationale, not just what changed).
 - Committing without running the build (0-error gate exists for a reason).
 - Updating shared sections of PROGRESS.md (Reviewer-only domain — "現在進度", "設計決策變更紀錄").
-- Committing to `main` instead of your `session/<id>` branch (bypasses review; use `git branch --show-current` to verify before committing).
-- Forgetting to rebase before starting a new milestone (you'll miss other Workers' merged changes and the Reviewer's `--ff-only` merge will fail).
+- Committing to `main` or the session branch instead of your `worker/<id>` branch (bypasses review; use `git branch --show-current` to verify before committing).
+- Forgetting to rebase before starting a new milestone (you'll miss other Workers' merged changes and the Reviewer's `--ff-only` merge will fail). Rebase target is the session branch (`git rebase session/<slug>`), not main.
 - Skipping the daily summary at session close (Reviewer gates cleanup on this file existing — your session will hang in limbo until you write it).
 - Using Glob/Grep/Read for code exploration without first trying codebase-memory tools (codebase-memory provides architectural context and cross-file relationships that file-level tools miss; always try codebase-memory first, fall back only if unavailable).

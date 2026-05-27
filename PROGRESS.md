@@ -292,7 +292,8 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: high — Reviewer is the session lifecycle owner
 
 ### M8.3 — worker.md: update rebase target and branch naming
-- [ ] **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`, `.claude-multi-session/roles/worker.md`
+- [x] <!-- SessionC --> 「註」4 edits: (1) setup step 0 branch verify → `worker/<id>`, (2) rebase responsibility → `git rebase session/<slug>`, (3) commit responsibility → `worker/<id>` never session/main, (4) common mistakes → `worker/<id>` for commit target + session branch for rebase target. Root copy byte-identical.
+- **Expected files**: `plugins/claude-multi-session/templates/.claude-multi-session/roles/worker.md`, `.claude-multi-session/roles/worker.md`
 - **Acceptance**:
   - Setup step 0: verify worktree path + branch is `worker/<id>` (not `session/<id>`)
   - Responsibility "Rebase before each milestone": target is session branch (`git rebase session/<slug>`), not main
