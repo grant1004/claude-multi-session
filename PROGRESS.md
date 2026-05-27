@@ -316,7 +316,8 @@ Phase 5 branch-based lifecycle: Wave 1 dispatching (M8.1–M8.3).
 - **ROI**: high — message templates define what Workers actually see and follow
 
 ### M8.5 — audit.md command: add session branch creation
-- [ ] **Expected files**: `plugins/claude-multi-session/commands/multi-session/audit.md`
+- [x] <!-- SessionC --> 「註」Inserted new §8 between "Write PROGRESS.md" (§7) and "Report and stop" (now §9). 4-step flow: check existing session branch → derive slug from project/Q1 → create `session/<YYYY-MM-DD>-<slug>` from main → return to main. Catchup mode skips creation. §9 report now includes session branch name. No frontmatter change needed (Bash already allowed).
+- **Expected files**: `plugins/claude-multi-session/commands/multi-session/audit.md`
 - **Acceptance**:
   - New step after writing PROGRESS.md (§7) and before "Report and stop" (§8): create session branch `git checkout -b session/<YYYY-MM-DD>-<slug> main` where slug is derived from the audit's project name or user's stated goal (from Grill Q1)
   - `allowed-tools` includes `Bash(git:*)` (already present) for branch creation
